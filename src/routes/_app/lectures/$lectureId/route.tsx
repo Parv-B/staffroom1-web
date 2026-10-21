@@ -101,6 +101,9 @@ function Tabs({ lectureId, done }: { lectureId: string; done: boolean }) {
           <Link to="/lectures/$lectureId/transcript" params={params} className={tab}>
             Transcript
           </Link>
+          <Link to="/lectures/$lectureId/notes" params={params} className={tab}>
+            Notes
+          </Link>
         </>
       ) : null}
       <Link to="/lectures/$lectureId/status" params={params} className={tab}>

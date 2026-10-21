@@ -19,6 +19,7 @@ import { Route as AppLecturesLectureIdRouteRouteImport } from "./routes/_app/lec
 import { Route as AppLecturesNewRouteImport } from "./routes/_app/lectures/new"
 import { Route as AppLecturesLectureIdIndexRouteImport } from "./routes/_app/lectures/$lectureId/index"
 import { Route as AppLecturesLectureIdAnalysisRouteRouteImport } from "./routes/_app/lectures/$lectureId/analysis/route"
+import { Route as AppLecturesLectureIdNotesRouteImport } from "./routes/_app/lectures/$lectureId/notes"
 import { Route as AppLecturesLectureIdStatusRouteImport } from "./routes/_app/lectures/$lectureId/status"
 import { Route as AppLecturesLectureIdTranscriptRouteImport } from "./routes/_app/lectures/$lectureId/transcript"
 import { Route as AppLecturesLectureIdAnalysisCoverageRouteImport } from "./routes/_app/lectures/$lectureId/analysis/coverage"
@@ -79,6 +80,12 @@ const AppLecturesLectureIdAnalysisRouteRoute =
     path: "/analysis",
     getParentRoute: () => AppLecturesLectureIdRouteRoute,
   } as any)
+const AppLecturesLectureIdNotesRoute =
+  AppLecturesLectureIdNotesRouteImport.update({
+    id: "/notes",
+    path: "/notes",
+    getParentRoute: () => AppLecturesLectureIdRouteRoute,
+  } as any)
 const AppLecturesLectureIdStatusRoute =
   AppLecturesLectureIdStatusRouteImport.update({
     id: "/status",
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures/": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
   "/lectures/$lectureId/": typeof AppLecturesLectureIdIndexRoute
@@ -148,6 +156,7 @@ export interface FileRoutesByTo {
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
   "/lectures/$lectureId": typeof AppLecturesLectureIdIndexRoute
@@ -168,6 +177,7 @@ export interface FileRoutesById {
   "/_app/lectures/new": typeof AppLecturesNewRoute
   "/_app/lectures/": typeof AppLecturesIndexRoute
   "/_app/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/_app/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/_app/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/_app/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
   "/_app/lectures/$lectureId/": typeof AppLecturesLectureIdIndexRoute
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | "/lectures/new"
     | "/lectures/"
     | "/lectures/$lectureId/analysis"
+    | "/lectures/$lectureId/notes"
     | "/lectures/$lectureId/status"
     | "/lectures/$lectureId/transcript"
     | "/lectures/$lectureId/"
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | "/lectures/new"
     | "/lectures"
     | "/lectures/$lectureId/analysis"
+    | "/lectures/$lectureId/notes"
     | "/lectures/$lectureId/status"
     | "/lectures/$lectureId/transcript"
     | "/lectures/$lectureId"
@@ -224,6 +236,7 @@ export interface FileRouteTypes {
     | "/_app/lectures/new"
     | "/_app/lectures/"
     | "/_app/lectures/$lectureId/analysis"
+    | "/_app/lectures/$lectureId/notes"
     | "/_app/lectures/$lectureId/status"
     | "/_app/lectures/$lectureId/transcript"
     | "/_app/lectures/$lectureId/"
@@ -313,6 +326,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppLecturesLectureIdAnalysisRouteRouteImport
       parentRoute: typeof AppLecturesLectureIdRouteRoute
     }
+    "/_app/lectures/$lectureId/notes": {
+      id: "/_app/lectures/$lectureId/notes"
+      path: "/notes"
+      fullPath: "/lectures/$lectureId/notes"
+      preLoaderRoute: typeof AppLecturesLectureIdNotesRouteImport
+      parentRoute: typeof AppLecturesLectureIdRouteRoute
+    }
     "/_app/lectures/$lectureId/status": {
       id: "/_app/lectures/$lectureId/status"
       path: "/status"
@@ -394,6 +414,7 @@ const AppLecturesLectureIdAnalysisRouteRouteWithChildren =
 
 interface AppLecturesLectureIdRouteRouteChildren {
   AppLecturesLectureIdAnalysisRouteRoute: typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  AppLecturesLectureIdNotesRoute: typeof AppLecturesLectureIdNotesRoute
   AppLecturesLectureIdStatusRoute: typeof AppLecturesLectureIdStatusRoute
   AppLecturesLectureIdTranscriptRoute: typeof AppLecturesLectureIdTranscriptRoute
   AppLecturesLectureIdIndexRoute: typeof AppLecturesLectureIdIndexRoute
@@ -403,6 +424,7 @@ const AppLecturesLectureIdRouteRouteChildren: AppLecturesLectureIdRouteRouteChil
   {
     AppLecturesLectureIdAnalysisRouteRoute:
       AppLecturesLectureIdAnalysisRouteRouteWithChildren,
+    AppLecturesLectureIdNotesRoute: AppLecturesLectureIdNotesRoute,
     AppLecturesLectureIdStatusRoute: AppLecturesLectureIdStatusRoute,
     AppLecturesLectureIdTranscriptRoute: AppLecturesLectureIdTranscriptRoute,
     AppLecturesLectureIdIndexRoute: AppLecturesLectureIdIndexRoute,

@@ -2,7 +2,7 @@ node_modules
 dist
 playwright-report
 test-results
-screenshots
+screenshots/archive/
 e2e/.auth
 .env*
 !.env.example

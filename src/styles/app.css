@@ -229,4 +229,31 @@
   [data-no-print] {
     display: none !important;
   }
+  /* Lecture notes print as a handout: the draft/approved and out-of-date labels stay, the
+     transcript excerpts and controls go, and nothing is tinted or underlined like a link. */
+  .notes-print {
+    border-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  .notes-print details {
+    display: none !important;
+  }
+  .notes-print button,
+  .notes-print .action {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  .notes-print section {
+    break-inside: avoid-page;
+  }
+  .notes-print li {
+    break-inside: avoid;
+  }
+  .bg-sheet {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  @page {
+    margin: 18mm 16mm;
+  }
 }

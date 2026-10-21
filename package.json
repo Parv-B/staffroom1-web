@@ -17,7 +17,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "e2e": "playwright test",
-    "gen:metrics": "node scripts/gen-metrics.mjs"
+    "gen:metrics": "node scripts/gen-metrics.mjs",
+    "screens": "playwright test -c playwright.screens.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/literata": "^5.3.0",

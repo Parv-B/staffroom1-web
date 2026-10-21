@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from "./routes/index"
 import { Route as AppRouteImport } from "./routes/_app"
 import { Route as SignInRouteImport } from "./routes/sign-in"
 import { Route as StyleTileRouteImport } from "./routes/style-tile"
+import { Route as AppCentreRouteImport } from "./routes/_app/centre"
 import { Route as AppAccountPasswordRouteImport } from "./routes/_app/account/password"
+import { Route as AppAdminUsersRouteImport } from "./routes/_app/admin/users"
 import { Route as AppLecturesIndexRouteImport } from "./routes/_app/lectures/index"
 import { Route as AppLecturesLectureIdRouteRouteImport } from "./routes/_app/lectures/$lectureId/route"
 import { Route as AppLecturesNewRouteImport } from "./routes/_app/lectures/new"
@@ -47,9 +49,19 @@ const StyleTileRoute = StyleTileRouteImport.update({
   path: "/style-tile",
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppCentreRoute = AppCentreRouteImport.update({
+  id: "/centre",
+  path: "/centre",
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAccountPasswordRoute = AppAccountPasswordRouteImport.update({
   id: "/account/password",
   path: "/account/password",
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
+  id: "/admin/users",
+  path: "/admin/users",
   getParentRoute: () => AppRoute,
 } as any)
 const AppLecturesIndexRoute = AppLecturesIndexRouteImport.update({
@@ -133,8 +145,10 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
+  "/centre": typeof AppCentreRoute
   "/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/account/password": typeof AppAccountPasswordRoute
+  "/admin/users": typeof AppAdminUsersRoute
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures/": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
@@ -152,7 +166,9 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
+  "/centre": typeof AppCentreRoute
   "/account/password": typeof AppAccountPasswordRoute
+  "/admin/users": typeof AppAdminUsersRoute
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
@@ -172,8 +188,10 @@ export interface FileRoutesById {
   "/_app": typeof AppRouteWithChildren
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
+  "/_app/centre": typeof AppCentreRoute
   "/_app/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/_app/account/password": typeof AppAccountPasswordRoute
+  "/_app/admin/users": typeof AppAdminUsersRoute
   "/_app/lectures/new": typeof AppLecturesNewRoute
   "/_app/lectures/": typeof AppLecturesIndexRoute
   "/_app/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
@@ -193,8 +211,10 @@ export interface FileRouteTypes {
     | "/"
     | "/sign-in"
     | "/style-tile"
+    | "/centre"
     | "/lectures/$lectureId"
     | "/account/password"
+    | "/admin/users"
     | "/lectures/new"
     | "/lectures/"
     | "/lectures/$lectureId/analysis"
@@ -212,7 +232,9 @@ export interface FileRouteTypes {
     | "/"
     | "/sign-in"
     | "/style-tile"
+    | "/centre"
     | "/account/password"
+    | "/admin/users"
     | "/lectures/new"
     | "/lectures"
     | "/lectures/$lectureId/analysis"
@@ -231,8 +253,10 @@ export interface FileRouteTypes {
     | "/_app"
     | "/sign-in"
     | "/style-tile"
+    | "/_app/centre"
     | "/_app/lectures/$lectureId"
     | "/_app/account/password"
+    | "/_app/admin/users"
     | "/_app/lectures/new"
     | "/_app/lectures/"
     | "/_app/lectures/$lectureId/analysis"
@@ -284,11 +308,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof StyleTileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/_app/centre": {
+      id: "/_app/centre"
+      path: "/centre"
+      fullPath: "/centre"
+      preLoaderRoute: typeof AppCentreRouteImport
+      parentRoute: typeof AppRoute
+    }
     "/_app/account/password": {
       id: "/_app/account/password"
       path: "/account/password"
       fullPath: "/account/password"
       preLoaderRoute: typeof AppAccountPasswordRouteImport
+      parentRoute: typeof AppRoute
+    }
+    "/_app/admin/users": {
+      id: "/_app/admin/users"
+      path: "/admin/users"
+      fullPath: "/admin/users"
+      preLoaderRoute: typeof AppAdminUsersRouteImport
       parentRoute: typeof AppRoute
     }
     "/_app/lectures/": {
@@ -436,15 +474,19 @@ const AppLecturesLectureIdRouteRouteWithChildren =
   )
 
 interface AppRouteChildren {
+  AppCentreRoute: typeof AppCentreRoute
   AppLecturesLectureIdRouteRoute: typeof AppLecturesLectureIdRouteRouteWithChildren
   AppAccountPasswordRoute: typeof AppAccountPasswordRoute
+  AppAdminUsersRoute: typeof AppAdminUsersRoute
   AppLecturesNewRoute: typeof AppLecturesNewRoute
   AppLecturesIndexRoute: typeof AppLecturesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCentreRoute: AppCentreRoute,
   AppLecturesLectureIdRouteRoute: AppLecturesLectureIdRouteRouteWithChildren,
   AppAccountPasswordRoute: AppAccountPasswordRoute,
+  AppAdminUsersRoute: AppAdminUsersRoute,
   AppLecturesNewRoute: AppLecturesNewRoute,
   AppLecturesIndexRoute: AppLecturesIndexRoute,
 }

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Button, Menu, MenuItem, MenuTrigger, Popover } from "react-aria-components";
-import { ROLE_LABEL } from "~/auth/roles";
+import { ROLE_LABEL, can } from "~/auth/roles";
 import { ensureSession, meQuery, signOut, type Me } from "~/auth/session";
 
 // Everything behind sign-in renders inside this layout.
@@ -48,6 +48,16 @@ function Header({ me }: { me: Me }) {
         <Link to="/lectures" className={navLink} activeOptions={{ exact: true }}>
           Lectures
         </Link>
+        {can.seeCentreSummary(me.role) ? (
+          <Link to="/centre" className={navLink}>
+            Centre
+          </Link>
+        ) : null}
+        {can.manageUsers(me.role) ? (
+          <Link to="/admin/users" className={navLink}>
+            Users
+          </Link>
+        ) : null}
       </nav>
       <MenuTrigger>
         <Button className="t-small ml-auto rounded-[3px] px-2 py-1 text-left hover:bg-sheet" aria-label={`Account: ${me.display_name ?? me.email}`}>

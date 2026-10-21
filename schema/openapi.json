@@ -1749,6 +1749,17 @@
             "type": "object",
             "title": "Findings"
           },
+          "findings_n_lectures": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Findings N Lectures"
+          },
+          "n_done_categories_unknown": {
+            "type": "integer",
+            "title": "N Done Categories Unknown"
+          },
           "metrics": {
             "additionalProperties": {
               "$ref": "#/components/schemas/MetricAggregate"
@@ -1763,6 +1774,8 @@
           "lectures_by_status",
           "n_done_without_metrics",
           "findings",
+          "findings_n_lectures",
+          "n_done_categories_unknown",
           "metrics"
         ],
         "title": "GroupSummary"
@@ -1887,6 +1900,20 @@
               }
             ],
             "title": "Duration Ms"
+          },
+          "released_categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Category"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Released Categories"
           },
           "created_at": {
             "type": "string",
@@ -2079,6 +2106,20 @@
               }
             ],
             "title": "Duration Ms"
+          },
+          "released_categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Category"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Released Categories"
           },
           "created_at": {
             "type": "string",
@@ -2943,6 +2984,92 @@
         ],
         "title": "SectionIn"
       },
+      "Segment": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "pattern": "^s\\d{4,}$",
+            "title": "Segment Id"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Start Ms"
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "End Ms"
+          },
+          "speaker": {
+            "$ref": "#/components/schemas/Speaker"
+          },
+          "speaker_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Label"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "text_asr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Asr"
+          },
+          "lang_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Lang Tags",
+            "default": []
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "words": {
+            "items": {
+              "$ref": "#/components/schemas/Word"
+            },
+            "type": "array",
+            "title": "Words",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id",
+          "start_ms",
+          "end_ms",
+          "speaker",
+          "text"
+        ],
+        "title": "Segment"
+      },
       "ShareIn": {
         "properties": {
           "shared": {
@@ -2973,6 +3100,15 @@
           "shared_with_owner"
         ],
         "title": "ShareOut"
+      },
+      "Speaker": {
+        "type": "string",
+        "enum": [
+          "teacher",
+          "student",
+          "unknown"
+        ],
+        "title": "Speaker"
       },
       "StageEstimate": {
         "properties": {
@@ -3168,6 +3304,17 @@
             "type": "object",
             "title": "Findings"
           },
+          "findings_n_lectures": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Findings N Lectures"
+          },
+          "n_done_categories_unknown": {
+            "type": "integer",
+            "title": "N Done Categories Unknown"
+          },
           "metrics": {
             "additionalProperties": {
               "$ref": "#/components/schemas/MetricAggregate"
@@ -3201,6 +3348,8 @@
           "lectures_by_status",
           "n_done_without_metrics",
           "findings",
+          "findings_n_lectures",
+          "n_done_categories_unknown",
           "metrics",
           "teacher_user_id",
           "display_name",
@@ -3231,6 +3380,33 @@
         ],
         "title": "TokenOut"
       },
+      "Transcript": {
+        "properties": {
+          "duration_ms": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Duration Ms"
+          },
+          "asr_provider": {
+            "type": "string",
+            "title": "Asr Provider"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "title": "Segments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "duration_ms",
+          "asr_provider",
+          "segments"
+        ],
+        "title": "Transcript"
+      },
       "TranscriptOut": {
         "properties": {
           "lecture_id": {
@@ -3242,7 +3418,7 @@
             "title": "Redacted"
           },
           "transcript": {
-            "title": "Transcript"
+            "$ref": "#/components/schemas/Transcript"
           }
         },
         "type": "object",
@@ -3251,7 +3427,8 @@
           "redacted",
           "transcript"
         ],
-        "title": "TranscriptOut"
+        "title": "TranscriptOut",
+        "description": "``transcript`` is a ``Transcript`` for both ``raw=false`` (the analysis' redacted\ntranscript) and ``raw=true`` (the transcript stage's unredacted one)."
       },
       "UploadIn": {
         "properties": {
@@ -3608,6 +3785,66 @@
           "code"
         ],
         "title": "VerifyIn"
+      },
+      "Word": {
+        "properties": {
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Start Ms"
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "End Ms"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "text_asr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Asr"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "lang": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lang"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_ms",
+          "end_ms",
+          "text"
+        ],
+        "title": "Word"
       },
       "ClassComposition": {
         "enum": [

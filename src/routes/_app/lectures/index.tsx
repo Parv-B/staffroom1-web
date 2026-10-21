@@ -38,11 +38,6 @@ function LectureList() {
   const list = useQuery(lectureListQuery(filters));
   const org = useQuery({ ...orgSummaryQuery(), enabled: can.seeCentreSummary(me.role) });
 
-  // Which categories were reported depends on when each lecture was published, and the list
-  // doesn't say (FRONTEND_REQUESTS.md #2). The centre's current setting isn't a substitute: a
-  // lecture published before a category was released was never checked for it. So the list
-  // claims nothing about categories without findings.
-  const released: readonly Category[] | null = null;
   const teacherNames = new Map((org.data?.teachers ?? []).map((t) => [t.teacher_user_id, t.display_name ?? "Unnamed teacher"]));
   const showTeacher = can.filterByTeacher(me.role);
 
@@ -107,7 +102,7 @@ function LectureList() {
                 key={l.lecture_id}
                 lecture={l}
                 role={me.role}
-                released={released}
+                released={l.released_categories ?? null}
                 teacherName={showTeacher ? (teacherNames.get(l.teacher_user_id) ?? "Teacher not listed") : null}
               />
             ))}

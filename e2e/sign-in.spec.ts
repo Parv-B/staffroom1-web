@@ -40,10 +40,10 @@ for (const role of ["teacher", "owner", "admin"] as const) {
     await expect(row).toBeVisible();
     // Credibility in the list: a low-confidence measure is badged with its reason.
     await expect(row.getByText("Low confidence").first()).toBeVisible();
-    // The list can't tell per lecture which categories were released (FRONTEND_REQUESTS.md #2),
-    // so it must not claim "none" for any of them.
-    await expect(row.getByText("Other categories: open the analysis")).toBeVisible();
-    await expect(row.getByText("none", { exact: true })).toHaveCount(0);
+    // Per-lecture release status (released_categories): the fixture was checked for teaching
+    // practice and strengths only, so the other three are "not yet reported", never "none".
+    await expect(row.locator("[data-unreleased]")).toContainText("content accuracy");
+    await expect(row.getByText("Other categories: open the analysis")).toHaveCount(0);
     await expect(link).toHaveText("Surface Areas and Volumes");
 
     await page.getByRole("button", { name: /^Account/ }).click();

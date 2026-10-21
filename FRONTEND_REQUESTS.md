@@ -28,6 +28,12 @@ finished lectures. The client can only see those through `GET /lectures` and
 
 ## 2. Released categories per lecture in the lecture list (and in /org/summary)
 
+**Resolved 2026-10-21 (backend changelog, item 1).** `released_categories` is on every list and
+detail item, and `/org/summary` adds `findings_n_lectures` and `n_done_categories_unknown`. The
+list and the not-shared view now classify each category per lecture ("none" only for a category
+the lecture was checked for); the "Other categories: open the analysis" fallback is gone except
+for lectures without a report. The centre view uses `findings_n_lectures`.
+
 **Context.** Each `GET /lectures` item has `findings_summary` counts for the categories released
 *when that lecture was published*. A category missing from the counts is either released with
 no findings ("none in this lesson") or wasn't released then ("not yet reported"), and
@@ -52,6 +58,9 @@ classify. The analysis pages use the analysis' own released categories and are u
 
 ## 3. Recording length while a lecture is processing
 
+**Resolved 2026-10-21.** `duration_ms` is set when ingest finishes. No frontend change was
+needed; the "no time estimate yet" message now shows only before ingest has run.
+
 **Context.** `GET /lectures/processing-estimate` needs `duration_ms`, but list and detail items
 carry `duration_ms` only once the lecture has a report, which is after processing ends. So the
 status page can never ask for an estimate while one would be useful.
@@ -65,6 +74,9 @@ needed when this lands.
 length isn't known until processing has read it." It never guesses a length.
 
 ## 4. Raw transcript response shape
+
+**Resolved 2026-10-21.** `raw=true` returns a `Transcript`, typed in OpenAPI. The frontend's
+"accept both" fallback was removed; the raw transcript is still validated before it's shown.
 
 **Context.** `GET /lectures/{id}/transcript?raw=false` returns `TranscriptOut.transcript` as a
 `Transcript` (as in the analysis schema). `?raw=true` returns the transcript stage's artifact,

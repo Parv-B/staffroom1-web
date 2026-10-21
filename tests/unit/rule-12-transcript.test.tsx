@@ -30,14 +30,14 @@ describe("rule 12: transcript lines carry speaker and time; redaction is kept", 
   });
 });
 
-import { parseRawTranscript } from "~/lectures/detail";
+import { parseTranscript } from "~/analysis/parse";
 
 describe("rule 12: the raw transcript is validated before it is shown", () => {
   const t = { duration_ms: 1000, asr_provider: "x", segments: [{ segment_id: "s0001", start_ms: 0, end_ms: 500, speaker: "teacher", text: "Hi." }] };
-  it("accepts a Transcript or the stage artifact that wraps one, and nothing else", () => {
-    expect(parseRawTranscript(t).ok).toBe(true);
-    expect(parseRawTranscript({ transcript: t, diarization_method: "x", teacher_id_method: "y", warnings: [] }).ok).toBe(true);
-    expect(parseRawTranscript({ transcript: { segments: "nope" } }).ok).toBe(false);
-    expect(parseRawTranscript(null).ok).toBe(false);
+  it("accepts a Transcript and nothing else", () => {
+    expect(parseTranscript(t).ok).toBe(true);
+    expect(parseTranscript({ transcript: t }).ok).toBe(false);
+    expect(parseTranscript({ segments: "nope" }).ok).toBe(false);
+    expect(parseTranscript(null).ok).toBe(false);
   });
 });

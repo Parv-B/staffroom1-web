@@ -12,9 +12,10 @@ function total(bySeverity: BySeverity | undefined): number {
   return Object.values(bySeverity ?? {}).reduce<number>((a, b) => a + (b ?? 0), 0);
 }
 
-/** Rule 6. `released` null means the list couldn't say which categories are released (see
- *  FRONTEND_REQUESTS.md #2): then only categories with findings are shown, and nothing is
- *  claimed about the rest. A category that isn't released is never shown as zero. */
+/** Rule 6. `released` is the categories this lecture was checked for (`released_categories`
+ *  on list and detail items, or the analysis' own). Null means the lecture has no report yet:
+ *  then only categories with findings are shown and nothing is claimed about the rest. A
+ *  category that isn't released is never shown as zero. */
 export function FindingCounts({ counts, released }: { counts: Counts; released: readonly Category[] | null }) {
   const rows: { category: Category; n: number; detail: string | null }[] = [];
   const unreleased: Category[] = [];

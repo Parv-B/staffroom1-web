@@ -75,8 +75,7 @@ function NotShared({ lectureId }: { lectureId: string; role: Role }) {
         <div className="grid max-w-5xl gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <div>
             <h3 className="t-small font-semibold text-slate">Findings</h3>
-            {/* Per-lecture release status isn't available here (FRONTEND_REQUESTS.md #2). */}
-            <FindingCounts counts={d.findings_summary} released={null} />
+            <FindingCounts counts={d.findings_summary} released={d.released_categories ?? null} />
           </div>
           <div>
             <h3 className="t-small font-semibold text-slate">Key measures</h3>

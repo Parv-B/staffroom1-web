@@ -11,7 +11,7 @@ describe("rule 6: unreleased categories are 'not yet reported', never zero", () 
     expect(container.textContent).not.toMatch(/Content accuracy\s*none/i);
   });
 
-  it("claims nothing about categories it can't classify when the released list is unknown", () => {
+  it("with no report yet (released null), claims nothing about categories without findings", () => {
     const { container } = render(<FindingCounts counts={{ strength: { minor: 2 } }} released={null} />);
     expect(container.textContent).not.toContain("none");
     expect(container.textContent).not.toMatch(/\b0\b/);

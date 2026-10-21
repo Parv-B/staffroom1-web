@@ -561,6 +561,12 @@ export interface components {
                     [key: string]: number;
                 };
             };
+            /** Findings N Lectures */
+            findings_n_lectures: {
+                [key: string]: number;
+            };
+            /** N Done Categories Unknown */
+            n_done_categories_unknown: number;
             /** Metrics */
             metrics: {
                 [key: string]: components["schemas"]["MetricAggregate"];
@@ -612,6 +618,8 @@ export interface components {
             asr_provider?: string | null;
             /** Duration Ms */
             duration_ms?: number | null;
+            /** Released Categories */
+            released_categories?: components["schemas"]["Category"][] | null;
             /**
              * Created At
              * Format: date-time
@@ -682,6 +690,8 @@ export interface components {
             asr_provider?: string | null;
             /** Duration Ms */
             duration_ms?: number | null;
+            /** Released Categories */
+            released_categories?: components["schemas"]["Category"][] | null;
             /**
              * Created At
              * Format: date-time
@@ -966,6 +976,34 @@ export interface components {
             /** Bullets */
             bullets: components["schemas"]["BulletIn"][];
         };
+        /** Segment */
+        Segment: {
+            /** Segment Id */
+            segment_id: string;
+            /** Start Ms */
+            start_ms: number;
+            /** End Ms */
+            end_ms: number;
+            speaker: components["schemas"]["Speaker"];
+            /** Speaker Label */
+            speaker_label?: string | null;
+            /** Text */
+            text: string;
+            /** Text Asr */
+            text_asr?: string | null;
+            /**
+             * Lang Tags
+             * @default []
+             */
+            lang_tags: string[];
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Words
+             * @default []
+             */
+            words: components["schemas"]["Word"][];
+        };
         /** ShareIn */
         ShareIn: {
             /** Shared */
@@ -978,6 +1016,11 @@ export interface components {
             /** Shared With Owner */
             shared_with_owner: boolean;
         };
+        /**
+         * Speaker
+         * @enum {string}
+         */
+        Speaker: "teacher" | "student" | "unknown";
         /** StageEstimate */
         StageEstimate: {
             /** Stage */
@@ -1047,6 +1090,12 @@ export interface components {
                     [key: string]: number;
                 };
             };
+            /** Findings N Lectures */
+            findings_n_lectures: {
+                [key: string]: number;
+            };
+            /** N Done Categories Unknown */
+            n_done_categories_unknown: number;
             /** Metrics */
             metrics: {
                 [key: string]: components["schemas"]["MetricAggregate"];
@@ -1070,14 +1119,26 @@ export interface components {
             /** Expires In */
             expires_in: number;
         };
-        /** TranscriptOut */
+        /** Transcript */
+        Transcript: {
+            /** Duration Ms */
+            duration_ms: number;
+            /** Asr Provider */
+            asr_provider: string;
+            /** Segments */
+            segments: components["schemas"]["Segment"][];
+        };
+        /**
+         * TranscriptOut
+         * @description ``transcript`` is a ``Transcript`` for both ``raw=false`` (the analysis' redacted
+         *     transcript) and ``raw=true`` (the transcript stage's unredacted one).
+         */
         TranscriptOut: {
             /** Lecture Id */
             lecture_id: string;
             /** Redacted */
             redacted: boolean;
-            /** Transcript */
-            transcript: unknown;
+            transcript: components["schemas"]["Transcript"];
         };
         /** UploadIn */
         UploadIn: {
@@ -1198,6 +1259,21 @@ export interface components {
             email: string;
             /** Code */
             code: string;
+        };
+        /** Word */
+        Word: {
+            /** Start Ms */
+            start_ms: number;
+            /** End Ms */
+            end_ms: number;
+            /** Text */
+            text: string;
+            /** Text Asr */
+            text_asr?: string | null;
+            /** Confidence */
+            confidence?: number | null;
+            /** Lang */
+            lang?: string | null;
         };
         /**
          * ClassComposition

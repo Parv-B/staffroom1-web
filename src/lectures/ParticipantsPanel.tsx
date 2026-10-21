@@ -150,12 +150,11 @@ function ParticipantEditor({ list, onChange, you }: { list: ParticipantList; onC
               </RadioField>
               <Button
                 className="action t-small"
-                aria-label={`Remove name ${(i + 1).toString()}`}
                 onPress={() => {
                   onChange({ ...list, rows: list.rows.filter((x) => x.key !== r.key) });
                 }}
               >
-                Remove
+                Remove<span className="sr-only"> name {(i + 1).toString()}</span>
               </Button>
             </li>
           ))}

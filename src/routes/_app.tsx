@@ -63,9 +63,10 @@ function Header({ me }: { me: Me }) {
         ) : null}
       </nav>
       <MenuTrigger>
-        <Button className="t-small ml-auto rounded-[3px] px-2 py-1 text-left hover:bg-sheet" aria-label={`Account: ${me.display_name ?? me.email}`}>
+        <Button className="t-small ml-auto rounded-[3px] px-2 py-1 text-left hover:bg-sheet">
           <span className="block font-semibold">{me.display_name ?? me.email}</span>
           <span className="block text-slate">{ROLE_LABEL[me.role]}</span>
+          <span className="sr-only">, account menu</span>
         </Button>
         <Popover placement="bottom end" className="min-w-56 border border-slate/40 bg-sheet py-1 shadow-[0_6px_20px_rgb(23_32_30/0.12)]">
           <Menu

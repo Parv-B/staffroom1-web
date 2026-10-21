@@ -300,10 +300,10 @@ function TeacherName({ id, name, active }: { id: string; name: string; active: b
       <span className="font-semibold">{name}</span>
       {active ? null : <span className="t-small text-slate"> (deactivated)</span>}
       <span className="t-small flex flex-wrap gap-x-3">
-        <Link to="/lectures" search={{ teacher: id }} className="action" aria-label={`${name}'s lectures`}>
+        <Link to="/lectures" search={{ teacher: id }} className="action">
           Their lectures
         </Link>
-        <Link to="/progress" search={{ teacher: id }} className="action" aria-label={`${name}'s measures over time`}>
+        <Link to="/progress" search={{ teacher: id }} className="action">
           Measures over time
         </Link>
       </span>

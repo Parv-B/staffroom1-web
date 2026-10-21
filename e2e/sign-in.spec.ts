@@ -32,7 +32,7 @@ for (const role of ["teacher", "owner", "admin"] as const) {
     await signIn(page, role);
     const e = expectations[role];
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(e.heading);
-    await expect(page.getByRole("button", { name: /^Account/ })).toContainText(e.roleLabel);
+    await expect(page.getByRole("button", { name: /account menu$/ })).toContainText(e.roleLabel);
     await expect(page.getByText("Teacher", { exact: true }).locator("xpath=..").getByRole("button")).toHaveCount(e.teacherFilter ? 1 : 0);
 
     const link = page.locator(`a[href="/lectures/${LECTURE_ID}"]`);
@@ -46,7 +46,7 @@ for (const role of ["teacher", "owner", "admin"] as const) {
     await expect(row.getByText("Other categories: open the analysis")).toHaveCount(0);
     await expect(link).toHaveText("Surface Areas and Volumes");
 
-    await page.getByRole("button", { name: /^Account/ }).click();
+    await page.getByRole("button", { name: /account menu$/ }).click();
     await page.getByRole("menuitem", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/sign-in/);
     await page.goto("/lectures");
@@ -70,7 +70,7 @@ test("a lecture opened in a new tab stays signed in, and signing out ends every 
   await expect(tab).toHaveURL(new RegExp(`/lectures/${LECTURE_ID}/analysis/overview$`));
   await expect(tab.getByRole("heading", { name: "Summary" })).toBeVisible();
 
-  await page.getByRole("button", { name: /^Account/ }).click();
+  await page.getByRole("button", { name: /account menu$/ }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in/);
   await tab.reload();

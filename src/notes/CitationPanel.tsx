@@ -90,7 +90,6 @@ export function CitationPanel({ segments, active, onToggle, onDone }: Props) {
                   onChange={() => {
                     onToggle(s.segment_id);
                   }}
-                  aria-label={`Cite ${mmss(s.start_ms)}, ${SPEAKER_LABEL[s.speaker]}: ${s.text}`}
                 >
                   <CheckboxButton className="group flex cursor-pointer items-start gap-2 data-[disabled]:cursor-not-allowed">
                   <span
@@ -101,6 +100,7 @@ export function CitationPanel({ segments, active, onToggle, onDone }: Props) {
                       <path d="M3 8.5l3 3 7-7" />
                     </svg>
                   </span>
+                  <span className="sr-only">Cite {mmss(s.start_ms)}: </span>
                   <LineText s={s} />
                   </CheckboxButton>
                 </CheckboxField>

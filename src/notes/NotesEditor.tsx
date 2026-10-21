@@ -247,12 +247,11 @@ function BulletEditor({
                   )}
                   <Button
                     className="action"
-                    aria-label={`Stop citing ${s ? mmss(s.start_ms) : "the missing line"} in ${label.toLowerCase()}`}
                     onPress={() => {
                       onChange({ ...b, segmentIds: b.segmentIds.filter((x) => x !== id) }, citeTarget);
                     }}
                   >
-                    Remove
+                    Remove<span className="sr-only"> {s ? mmss(s.start_ms) : "the missing line"} from {label.toLowerCase()}</span>
                   </Button>
                 </li>
               );
@@ -291,14 +290,15 @@ function ItemControls({
   const cls = "action t-small data-[disabled]:cursor-default data-[disabled]:text-slate data-[disabled]:no-underline";
   const body = (
     <>
-      <Button className={cls} isDisabled={index === 0} onPress={() => { onMove(-1); }} aria-label={`Move ${what} up`}>
-        Move up
+      <Button className={cls} isDisabled={index === 0} onPress={() => { onMove(-1); }}>
+        Move up<span className="sr-only">: {what}</span>
       </Button>
-      <Button className={cls} isDisabled={index === count - 1} onPress={() => { onMove(1); }} aria-label={`Move ${what} down`}>
-        Move down
+      <Button className={cls} isDisabled={index === count - 1} onPress={() => { onMove(1); }}>
+        Move down<span className="sr-only">: {what}</span>
       </Button>
-      <Button className={cls} onPress={onRemove} aria-label={`${removeLabel}: ${what}`}>
+      <Button className={cls} onPress={onRemove}>
         {removeLabel}
+        <span className="sr-only">: {what}</span>
       </Button>
     </>
   );

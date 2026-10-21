@@ -178,8 +178,9 @@ function ProgressTable({ lectures, isTeacher }: { lectures: Parameters<typeof bu
 
 function NoteRef({ n, children }: { n: number; children: ReactNode }) {
   return (
-    <a href={`#note-${n.toString()}`} className="action t-small ml-1 align-super" aria-label={`${typeof children === "string" ? children : ""} note ${n.toString()}`}>
+    <a href={`#note-${n.toString()}`} className="action t-small ml-1 align-super">
       {n}
+      <span className="sr-only"> ({children} see note {n.toString()})</span>
     </a>
   );
 }

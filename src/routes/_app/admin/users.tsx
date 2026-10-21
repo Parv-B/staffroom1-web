@@ -156,9 +156,8 @@ function UserTable({ caption, users, me, onEdit }: { caption: string; users: rea
                   onPress={() => {
                     onEdit(u);
                   }}
-                  aria-label={`Change ${displayName(u)}`}
                 >
-                  Change
+                  Change<span className="sr-only"> {displayName(u)}</span>
                 </Button>
               </td>
             </tr>

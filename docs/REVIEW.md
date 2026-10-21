@@ -5,6 +5,37 @@ with an API token placed in sessionStorage, so no password is ever typed or show
 1180×820 (tablet landscape) unless the name says portrait (820×1180). All data is the E2E
 centre's; the fixture lecture's student names are redacted as `[student]`.
 
+## Every screen, per role
+
+| Screen | Teacher | Owner | Admin |
+|---|---|---|---|
+| Sign in (signed out) | ![](../screenshots/sign-in.png) | | |
+| Lecture list | ![](../screenshots/lectures-teacher.png) ([portrait](../screenshots/lectures-teacher-portrait.png)) | ![](../screenshots/lectures-owner.png) | ![](../screenshots/lectures-admin.png) |
+| Upload | ![](../screenshots/upload-teacher.png) | (no upload: explains why) | ![](../screenshots/upload-admin.png) |
+| Processing status | ![](../screenshots/status-teacher.png) | ![](../screenshots/status-owner.png) | ![](../screenshots/status-admin.png) |
+| Analysis: overview | ![](../screenshots/analysis-overview-teacher.png) | ![](../screenshots/analysis-overview-owner.png) | ![](../screenshots/analysis-overview-admin.png) |
+| Analysis: findings | ![](../screenshots/analysis-findings-teacher.png) | ![](../screenshots/analysis-findings-owner.png) | ![](../screenshots/analysis-findings-admin.png) |
+| Analysis: structure, coverage, measures | ![](../screenshots/analysis-structure-teacher.png) ![](../screenshots/analysis-coverage-teacher.png) ![](../screenshots/analysis-metrics-teacher.png) | | |
+| Not shared by the teacher | | ![](../screenshots/analysis-not-shared-owner.png) | |
+| Transcript | ![](../screenshots/transcript-teacher.png) ([portrait](../screenshots/transcript-teacher-portrait.png)) | ![](../screenshots/transcript-owner.png) | ![](../screenshots/transcript-admin.png) |
+| Lecture notes | see below | ![](../screenshots/notes-owner.png) | ![](../screenshots/notes-admin.png) |
+| Measures over time | ![](../screenshots/progress-teacher.png) | ![](../screenshots/progress-owner.png) | ![](../screenshots/progress-admin-empty.png) |
+| Centre summary | (not available) | ![](../screenshots/centre-owner.png) | ![](../screenshots/centre-admin.png) |
+| Users | (not available) | (not available) | ![](../screenshots/users-admin.png) |
+| Change password | ![](../screenshots/password-teacher.png) | same | same |
+| Empty list, failed load, unknown lecture | ![](../screenshots/state-lectures-empty-teacher.png) ![](../screenshots/state-analysis-error-teacher.png) ![](../screenshots/state-lecture-not-found-teacher.png) | | |
+
+## Polish done in this pass
+- Accessibility: `e2e/a11y.spec.ts` runs axe (WCAG 2.1 A and AA) on every screen for every role,
+  plus the notes editor with its transcript panel, the add-user form and the change-user dialog,
+  and a keyboard-only path (skip link; editing notes and ticking transcript lines with Enter and
+  Space). Fixed: accessible names that didn't contain the visible text (account menu, "Move
+  up", "Remove", "Change"); they now add hidden context after the visible words.
+- An unexpected rendering failure shows a plain "This page couldn't be shown" page.
+- Tablet portrait: wide tables (centre, measures over time, users) scroll sideways inside their
+  own labelled, focusable region; the notes transcript panel becomes a side sheet.
+- Print: lecture notes print as a handout (see `notes-print.png`).
+
 ## Lecture notes (milestone e)
 
 | Screen | Role | Screenshot |
@@ -103,4 +134,18 @@ Decisions made on your behalf:
   chat" when they were given; names never come back.
 
 ## Needs your decision
-- None yet for the notes.
+1. **Wording for categories a lecture was never checked for.** Rule 6's phrase "Not yet reported
+   (still being validated)" is used everywhere. For lectures processed before a category was
+   released (the fixture lecture: only teaching practice and strengths), "Not checked for this
+   lesson" would be more exact now that all five are released. Keep the brief's phrase, or
+   switch for those lectures?
+2. **First password required when adding a user.** Chosen because code sign-in is off. When
+   email codes are switched on, it could become optional.
+3. **The participant list isn't kept across a page refresh** (it holds minors' names, so it
+   stays out of browser storage); the teacher pastes it again. Acceptable?
+4. **Measures over time has no chart.** Per-lecture values are a table with numbered notes.
+   A plain dot-per-lecture chart per measure is possible, but it invites reading trends as
+   better or worse; I left it out.
+5. **E2E user accounts accumulate** (one deactivated `e2e-managed-…` user per run), because
+   accounts can't be deleted. A backend delete for test users, or a fixed reusable test user,
+   would avoid it.

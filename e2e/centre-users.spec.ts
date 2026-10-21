@@ -1,16 +1,27 @@
 import { expect, test } from "@playwright/test";
 import { API_URL, apiToken, signIn } from "./helpers";
 
-test("owner: centre summary lists teachers alphabetically, with N/A, low confidence and unchecked categories labelled", async ({ page }) => {
+test("owner: centre summary lists teachers alphabetically, with N/A, low confidence and unchecked categories labelled", async ({ page, request }) => {
   await signIn(page, "owner");
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Centre" }).click();
   await expect(page.getByRole("heading", { name: "Centre summary" })).toBeVisible();
   const lectures = page.getByRole("region", { name: "Lectures by teacher" });
   await expect(lectures.getByRole("rowheader").first()).toHaveText("Whole centre");
   await expect(lectures.getByRole("rowheader", { name: /E2E teacher/ })).toBeVisible();
-  // Content accuracy was not checked for any of the centre's lectures: never a zero.
+  // Each category reads as the API counted it: "Not checked" when no lecture was checked for
+  // it (never a zero), else the count and how many lectures it covers.
+  const token = await apiToken(request, "owner");
+  const summary = (await (await request.get(`${API_URL}/org/summary`, { headers: { Authorization: `Bearer ${token}` } })).json()) as { org: { findings_n_lectures: Record<string, number> } };
   const findings = page.getByRole("region", { name: "Findings by teacher" });
-  await expect(findings.getByText("Not checked in any lecture yet").first()).toBeVisible();
+  const centreRow = findings.getByRole("row").filter({ has: page.getByRole("rowheader", { name: "Whole centre" }) });
+  const labels = ["What worked well", "Teaching practice", "Content accuracy", "Explanation gaps", "Classroom conduct"];
+  const order = ["strength", "pedagogy", "content_error", "explanation_gap", "conduct"];
+  for (const [i, c] of order.entries()) {
+    const cell = centreRow.getByRole("cell").nth(i);
+    const n = summary.org.findings_n_lectures[c] ?? 0;
+    if (n === 0) await expect(cell, labels[i]).toHaveText("Not checked in any lecture yet");
+    else await expect(cell, labels[i]).toContainText(`in ${n.toString()} lecture`);
+  }
   // Wait time is low confidence in the fixture lectures.
   await page.getByRole("radio", { name: "Wait time after a question (median)" }).click({ force: true });
   await expect(page).toHaveURL(/metric=wait_time_median_s/);

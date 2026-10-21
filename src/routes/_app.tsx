@@ -48,6 +48,9 @@ function Header({ me }: { me: Me }) {
         <Link to="/lectures" className={navLink} activeOptions={{ exact: true }}>
           Lectures
         </Link>
+        <Link to="/progress" className={navLink}>
+          {me.role === "teacher" ? "Your measures" : "Measures over time"}
+        </Link>
         {can.seeCentreSummary(me.role) ? (
           <Link to="/centre" className={navLink}>
             Centre

@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from "./routes/_app"
 import { Route as SignInRouteImport } from "./routes/sign-in"
 import { Route as StyleTileRouteImport } from "./routes/style-tile"
 import { Route as AppCentreRouteImport } from "./routes/_app/centre"
+import { Route as AppProgressRouteImport } from "./routes/_app/progress"
 import { Route as AppAccountPasswordRouteImport } from "./routes/_app/account/password"
 import { Route as AppAdminUsersRouteImport } from "./routes/_app/admin/users"
 import { Route as AppLecturesIndexRouteImport } from "./routes/_app/lectures/index"
@@ -52,6 +53,11 @@ const StyleTileRoute = StyleTileRouteImport.update({
 const AppCentreRoute = AppCentreRouteImport.update({
   id: "/centre",
   path: "/centre",
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: "/progress",
+  path: "/progress",
   getParentRoute: () => AppRoute,
 } as any)
 const AppAccountPasswordRoute = AppAccountPasswordRouteImport.update({
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
   "/centre": typeof AppCentreRoute
+  "/progress": typeof AppProgressRoute
   "/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/account/password": typeof AppAccountPasswordRoute
   "/admin/users": typeof AppAdminUsersRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
   "/centre": typeof AppCentreRoute
+  "/progress": typeof AppProgressRoute
   "/account/password": typeof AppAccountPasswordRoute
   "/admin/users": typeof AppAdminUsersRoute
   "/lectures/new": typeof AppLecturesNewRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   "/sign-in": typeof SignInRoute
   "/style-tile": typeof StyleTileRoute
   "/_app/centre": typeof AppCentreRoute
+  "/_app/progress": typeof AppProgressRoute
   "/_app/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/_app/account/password": typeof AppAccountPasswordRoute
   "/_app/admin/users": typeof AppAdminUsersRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | "/sign-in"
     | "/style-tile"
     | "/centre"
+    | "/progress"
     | "/lectures/$lectureId"
     | "/account/password"
     | "/admin/users"
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | "/sign-in"
     | "/style-tile"
     | "/centre"
+    | "/progress"
     | "/account/password"
     | "/admin/users"
     | "/lectures/new"
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | "/sign-in"
     | "/style-tile"
     | "/_app/centre"
+    | "/_app/progress"
     | "/_app/lectures/$lectureId"
     | "/_app/account/password"
     | "/_app/admin/users"
@@ -313,6 +325,13 @@ declare module "@tanstack/react-router" {
       path: "/centre"
       fullPath: "/centre"
       preLoaderRoute: typeof AppCentreRouteImport
+      parentRoute: typeof AppRoute
+    }
+    "/_app/progress": {
+      id: "/_app/progress"
+      path: "/progress"
+      fullPath: "/progress"
+      preLoaderRoute: typeof AppProgressRouteImport
       parentRoute: typeof AppRoute
     }
     "/_app/account/password": {
@@ -475,6 +494,7 @@ const AppLecturesLectureIdRouteRouteWithChildren =
 
 interface AppRouteChildren {
   AppCentreRoute: typeof AppCentreRoute
+  AppProgressRoute: typeof AppProgressRoute
   AppLecturesLectureIdRouteRoute: typeof AppLecturesLectureIdRouteRouteWithChildren
   AppAccountPasswordRoute: typeof AppAccountPasswordRoute
   AppAdminUsersRoute: typeof AppAdminUsersRoute
@@ -484,6 +504,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCentreRoute: AppCentreRoute,
+  AppProgressRoute: AppProgressRoute,
   AppLecturesLectureIdRouteRoute: AppLecturesLectureIdRouteRouteWithChildren,
   AppAccountPasswordRoute: AppAccountPasswordRoute,
   AppAdminUsersRoute: AppAdminUsersRoute,

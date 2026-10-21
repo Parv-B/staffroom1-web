@@ -303,6 +303,9 @@ function TeacherName({ id, name, active }: { id: string; name: string; active: b
         <Link to="/lectures" search={{ teacher: id }} className="action" aria-label={`${name}'s lectures`}>
           Their lectures
         </Link>
+        <Link to="/progress" search={{ teacher: id }} className="action" aria-label={`${name}'s measures over time`}>
+          Measures over time
+        </Link>
       </span>
     </span>
   );

@@ -58,5 +58,24 @@ Decisions made on your behalf:
 - E2E creates one `e2e-managed-…@staffroom1-e2e.com` user per run and deactivates it after
   (accounts can't be deleted), so the E2E centre's Deactivated list grows by one per run.
 
+## Measures over time (teacher progress view)
+
+| Screen | Role | Screenshot |
+|---|---|---|
+| Your measures | teacher | ![](../screenshots/progress-teacher.png) |
+| Same, tablet portrait (table scrolls sideways in its own region) | teacher | ![](../screenshots/progress-teacher-portrait.png) |
+| One teacher's measures | owner | ![](../screenshots/progress-owner.png) |
+| No teacher chosen yet | admin | ![](../screenshots/progress-admin-empty.png) |
+
+Decisions made on your behalf:
+- `/progress`: one row per analysed lecture, oldest first, with the same eight measures as the
+  centre summary, each exactly as the lecture's report gave it. No chart, no averages, no
+  arrows or colours for up/down, and copy that says higher or lower isn't better in itself.
+- Reasons for N/A and low-confidence values are numbered notes under the table (identical
+  reasons share a note) so the table stays readable; every N/A and low-confidence cell links to
+  its note. The low-confidence mark is also written in the cell.
+- Owners and admins pick a teacher (also linked from each teacher in the centre summary). They
+  see the values they can already see in the lecture list, whatever the sharing.
+
 ## Needs your decision
 - None yet for the notes.

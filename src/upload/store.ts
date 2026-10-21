@@ -36,6 +36,8 @@ export interface UploadRecord {
   createdAt: number;
   updatedAt: number;
   draft?: MetadataDraft;
+  /** Which fields the teacher touched and which hold AI suggestions (src/lectures/suggest.ts). */
+  assist?: import("~/lectures/suggest").FormAssist;
 }
 
 export interface UploadStore {

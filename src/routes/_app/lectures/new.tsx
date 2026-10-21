@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type SyntheticEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, DropZone, type FileDropItem, FileTrigger, Form, Label, ListBox, ListBoxItem, Popover, Select, SelectValue, Text } from "react-aria-components";
 import { api, isApiError, unwrap, type Schemas } from "~/api/client";
 import { can } from "~/auth/roles";
 import { EMPTY_DRAFT, MetadataForm, fieldFor, type DraftField } from "~/lectures/MetadataForm";
+import { EMPTY_ASSIST, applySuggestion, fetchSuggestion, keepField, noteEdits, objectivesToSubmit, type FormAssist } from "~/lectures/suggest";
 import type { MetadataDraft, UploadRecord } from "~/upload/store";
 import { missingParts } from "~/upload/uploader";
 import { useUpload, type UploadState } from "~/upload/useUpload";
@@ -39,11 +40,26 @@ function NewLecture() {
   return <Uploader userId={me.user_id} isAdmin={me.role === "admin"} />;
 }
 
+interface FormState {
+  draft: MetadataDraft;
+  assist: FormAssist;
+}
+
 function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
-  const [draft, setDraft] = useState<MetadataDraft>(EMPTY_DRAFT);
-  // A resumed or reopened upload brings back the details typed before the refresh.
+  const [form, setForm] = useState<FormState>({ draft: EMPTY_DRAFT, assist: EMPTY_ASSIST });
+  const { draft, assist } = form;
+  // The latest form, for applying a suggestion that arrives while the teacher is typing.
+  const formRef = useRef(form);
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+  // The teacher's own edits: recorded as touched, so a suggestion never overwrites them.
+  const editDraft = useCallback((next: MetadataDraft) => {
+    setForm((f) => ({ draft: next, assist: noteEdits(f.draft, next, f.assist) }));
+  }, []);
+  // A resumed or reopened upload brings back the details (and their suggestion marks).
   const restore = useCallback((rec: UploadRecord) => {
-    if (rec.draft) setDraft(rec.draft);
+    if (rec.draft) setForm({ draft: rec.draft, assist: rec.assist ?? EMPTY_ASSIST });
   }, []);
   const up = useUpload(userId, restore);
   const [errors, setErrors] = useState<Partial<Record<DraftField, string>>>({});
@@ -60,11 +76,48 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
   useEffect(() => {
     if (!record) return;
     window.clearTimeout(draftTimer.current);
-    draftTimer.current = window.setTimeout(() => void up.saveDraft(record, draft), 500);
+    draftTimer.current = window.setTimeout(() => void up.saveDraft(record, draft, assist), 500);
     return () => {
       window.clearTimeout(draftTimer.current);
     };
-  }, [draft, record, up]);
+  }, [draft, assist, record, up]);
+
+  // Ask for suggestions once per finished upload. Never blocks the form or the submit button.
+  const completedId = up.state.kind === "completed" ? up.state.record.uploadId : null;
+  const [suggest, setSuggest] = useState<SuggestStatus>({ kind: "idle" });
+  const askedFor = useRef<string | null>(null);
+  const teacherForHistory = isAdmin ? draft.teacher_user_id || null : null;
+  const runSuggest = useCallback(
+    async (uploadId: string, refresh: boolean, signal?: AbortSignal) => {
+      setSuggest({ kind: "running" });
+      const out = await fetchSuggestion(uploadId, { refresh, teacherUserId: teacherForHistory, ...(signal ? { signal } : {}) });
+      if (signal?.aborted) return;
+      if (out.kind === "off") {
+        setSuggest({ kind: "off" });
+      } else if (out.kind === "failed" || out.suggestion.reason_if_unavailable) {
+        setSuggest({ kind: "none" });
+      } else {
+        const r = applySuggestion(formRef.current.draft, formRef.current.assist, out.suggestion);
+        setForm({ draft: r.draft, assist: r.assist });
+        setSuggest({ kind: "done", filled: r.filled });
+      }
+    },
+    [teacherForHistory],
+  );
+  // Only a newly finished upload starts a request; choosing a teacher later doesn't.
+  const startSuggest = useEffectEvent((uploadId: string, signal: AbortSignal) => {
+    void runSuggest(uploadId, false, signal);
+  });
+  useEffect(() => {
+    if (!completedId || askedFor.current === completedId) return;
+    askedFor.current = completedId;
+    const ac = new AbortController();
+    startSuggest(completedId, ac.signal);
+    return () => {
+      ac.abort();
+      askedFor.current = null;
+    };
+  }, [completedId]);
 
   async function onSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -100,7 +153,7 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
               class_composition: draft.class_composition,
               teacher_id: null,
               lesson_plan: draft.lesson_plan.trim() || null,
-              objectives: draft.objectives.split("\n").map((s) => s.trim()).filter(Boolean),
+              objectives: objectivesToSubmit(draft, assist),
             },
           },
         }),
@@ -168,14 +221,29 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
           <h2 id="details-heading" className="t-subheading">
             About the lesson
           </h2>
-          <p className="t-small mt-1 mb-6 text-slate">
+          <p className="t-small mt-1 text-slate">
             {up.state.kind === "completed" ? "Board, grade, subject, chapter and class type are needed." : "You can fill this in while the recording uploads."}
           </p>
+          <SuggestLine
+            status={suggest}
+            onAgain={completedId ? () => void runSuggest(completedId, true) : null}
+          />
+          <div className="mb-6" />
           <Form onSubmit={(e) => void onSubmit(e)} validationBehavior="aria">
             <MetadataForm
               draft={draft}
-              onChange={setDraft}
+              onChange={editDraft}
               errors={errors}
+              assist={assist}
+              onKeep={(field) => {
+                setForm((f) => ({ ...f, assist: keepField(f.assist, field) }));
+              }}
+              onKeepObjective={(i) => {
+                setForm((f) => ({ ...f, assist: { ...f.assist, objectives: f.assist.objectives.map((o, j) => (j === i ? { ...o, kept: true } : o)) } }));
+              }}
+              onRemoveObjective={(i) => {
+                setForm((f) => ({ ...f, assist: { ...f.assist, objectives: f.assist.objectives.filter((_, j) => j !== i) } }));
+              }}
               teacherPicker={
                 isAdmin ? (
                   <TeacherPicker
@@ -184,7 +252,7 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
                     value={draft.teacher_user_id}
                     error={errors.teacher_user_id}
                     onChange={(v) => {
-                      setDraft({ ...draft, teacher_user_id: v });
+                      editDraft({ ...draft, teacher_user_id: v });
                     }}
                   />
                 ) : null
@@ -205,6 +273,48 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
         </section>
       </div>
     </main>
+  );
+}
+
+type SuggestStatus =
+  | { kind: "idle" }
+  | { kind: "running" }
+  | { kind: "done"; filled: number }
+  | { kind: "none" }
+  | { kind: "off" };
+
+/** A quiet line about suggestions. The form never waits for it. */
+function SuggestLine({ status, onAgain }: { status: SuggestStatus; onAgain: (() => void) | null }) {
+  if (status.kind === "idle" || status.kind === "off") return null;
+  const filled = status.kind === "done" ? status.filled : 0;
+  return (
+    <div className="t-small mt-2 text-slate" aria-live="polite" data-suggest-status={status.kind}>
+      <p className="m-0">
+        {status.kind === "running"
+          ? "Suggesting details from the recording. Keep going; anything you fill in is left alone."
+          : status.kind === "none"
+            ? "No suggestions for this recording."
+            : filled > 0
+              ? `Suggested ${filled === 1 ? "1 detail" : `${filled.toString()} details`} from the recording, marked below. Check each one before you create the lecture.`
+              : "Nothing to suggest that you hadn't already filled in."}
+        {status.kind === "done" && onAgain ? (
+          <>
+            {" "}
+            <Button className="action" onPress={onAgain}>
+              Suggest again
+            </Button>
+          </>
+        ) : null}
+      </p>
+      <details className="mt-1">
+        <summary className="action w-fit">Where suggestions come from</summary>
+        <p className="measure mt-1">
+          Up to 5 minutes from the start of the class are sent to the transcription service. The transcript of that excerpt, with
+          students' names removed, goes to the AI model with the file name and your earlier lectures' details. The excerpt isn't
+          kept; only the suggestions are. Names not on the centre's name list may not be removed.
+        </p>
+      </details>
+    </div>
   );
 }
 

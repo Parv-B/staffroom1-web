@@ -67,6 +67,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -147,6 +150,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -188,6 +194,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -558,6 +567,81 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UploadStatusOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/uploads/{upload_id}/suggest-metadata": {
+      "post": {
+        "tags": [
+          "uploads"
+        ],
+        "summary": "Suggest Upload Metadata",
+        "description": "Suggest the lecture form's fields from the first minutes of a completed upload.\n\nSynchronous (about 15-40 s). One suggestion runs per upload at a time (claimed under the\nupload's row lock, then made without holding it). Provider failures are a 200 with every\nvalue null and ``reason_if_unavailable``.",
+        "operationId": "suggest_upload_metadata_uploads__upload_id__suggest_metadata_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Refresh"
+            }
+          },
+          {
+            "name": "teacher_user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 36
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Teacher User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSuggestionOut"
                 }
               }
             }
@@ -2128,6 +2212,121 @@
         ],
         "title": "MediaOut"
       },
+      "MetadataSuggestionOut": {
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/SuggestedFields"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objectives",
+            "default": []
+          },
+          "excerpt_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt Seconds"
+          },
+          "excerpt_start_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt Start Seconds"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "asr_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asr Provider"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0
+          },
+          "timings_s": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timings S",
+            "default": {}
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "reason_if_unavailable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason If Unavailable"
+          },
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id"
+          },
+          "cached": {
+            "type": "boolean",
+            "title": "Cached"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "upload_id",
+          "cached"
+        ],
+        "title": "MetadataSuggestionOut",
+        "description": "Prefill for the lecture form. Every field is a suggestion for the teacher to confirm;\n``reason_if_unavailable`` set means there is none (all values null)."
+      },
       "MetricAggregate": {
         "properties": {
           "unit": {
@@ -2882,6 +3081,66 @@
         ],
         "title": "StageOut"
       },
+      "SuggestedField": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "default": 0
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "SuggestedField",
+        "description": "``value`` is what the form field would be prefilled with (null: no suggestion);\n``reason`` cites what was said or which hint was used."
+      },
+      "SuggestedFields": {
+        "properties": {
+          "board": {
+            "$ref": "#/components/schemas/SuggestedField"
+          },
+          "grade": {
+            "$ref": "#/components/schemas/SuggestedField"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/SuggestedField"
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/SuggestedField"
+          },
+          "class_type": {
+            "$ref": "#/components/schemas/SuggestedField"
+          },
+          "class_composition": {
+            "$ref": "#/components/schemas/SuggestedField"
+          }
+        },
+        "type": "object",
+        "title": "SuggestedFields"
+      },
       "TeacherGroup": {
         "properties": {
           "n_lectures": {
@@ -3109,7 +3368,8 @@
         "enum": [
           "initiated",
           "completed",
-          "aborted"
+          "aborted",
+          "expired"
         ],
         "title": "UploadStatus"
       },

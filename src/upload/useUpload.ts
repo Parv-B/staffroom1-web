@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PutError } from "./transport";
+import type { FormAssist } from "~/lectures/suggest";
 import { indexedDbStore, type MetadataDraft, type UploadRecord } from "./store";
 import { UploadError, discardUpload, findResumable, runUpload, type Progress } from "./uploader";
 
@@ -115,9 +116,9 @@ export function useUpload(userId: string, onResume?: (rec: UploadRecord) => void
     setState({ kind: "completed", record: rec });
   }, []);
 
-  const saveDraft = useCallback(async (rec: UploadRecord, draft: MetadataDraft) => {
+  const saveDraft = useCallback(async (rec: UploadRecord, draft: MetadataDraft, assist?: FormAssist) => {
     try {
-      await indexedDbStore.put({ ...rec, draft, updatedAt: Date.now() });
+      await indexedDbStore.put({ ...rec, draft, ...(assist ? { assist } : {}), updatedAt: Date.now() });
     } catch {
       // Drafts are a convenience; nothing is lost but the draft.
     }

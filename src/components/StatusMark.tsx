@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "not-shared";
+export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "not-shared" | "suggested" | "suggested-tentative";
 
 // Each status has its own hue AND its own shape and word, so none relies on colour alone, and
 // none borrows a severity colour.
@@ -14,6 +14,10 @@ const STYLE: Record<StatusKind, { className: string; icon: ReactNode; label: str
   draft: { className: "text-slate border border-dashed border-slate", icon: <Pencil />, label: "Draft, not approved" },
   approved: { className: "text-pen border border-pen", icon: <Check />, label: "Approved" },
   "not-shared": { className: "text-ink bg-desk", icon: <Lock />, label: "Not shared by the teacher" },
+  // AI suggestions are provisional until the teacher keeps or edits them: dashed like a draft;
+  // a weak one uses the low-confidence hue.
+  suggested: { className: "text-slate border border-dashed border-slate", icon: <Pencil />, label: "Suggested from the recording" },
+  "suggested-tentative": { className: "text-heather border border-dashed border-heather", icon: <HalfCircle />, label: "Tentative suggestion" },
 };
 
 export function StatusMark({ kind, children }: { kind: StatusKind; children?: ReactNode }) {

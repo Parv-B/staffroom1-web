@@ -222,6 +222,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/uploads/{upload_id}/suggest-metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suggest Upload Metadata
+         * @description Suggest the lecture form's fields from the first minutes of a completed upload.
+         *
+         *     Synchronous (about 15-40 s). One suggestion runs per upload at a time (claimed under the
+         *     upload's row lock, then made without holding it). Provider failures are a 200 with every
+         *     value null and ``reason_if_unavailable``.
+         */
+        post: operations["suggest_upload_metadata_uploads__upload_id__suggest_metadata_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lectures": {
         parameters: {
             query?: never;
@@ -699,6 +723,52 @@ export interface components {
             /** Size Bytes */
             size_bytes: number | null;
         };
+        /**
+         * MetadataSuggestionOut
+         * @description Prefill for the lecture form. Every field is a suggestion for the teacher to confirm;
+         *     ``reason_if_unavailable`` set means there is none (all values null).
+         */
+        MetadataSuggestionOut: {
+            fields?: components["schemas"]["SuggestedFields"];
+            /**
+             * Objectives
+             * @default []
+             */
+            objectives: string[];
+            /** Excerpt Seconds */
+            excerpt_seconds?: number | null;
+            /** Excerpt Start Seconds */
+            excerpt_start_seconds?: number | null;
+            /** Model */
+            model?: string | null;
+            /** Asr Provider */
+            asr_provider?: string | null;
+            /** Prompt */
+            prompt?: string | null;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Timings S
+             * @default {}
+             */
+            timings_s: {
+                [key: string]: number;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Reason If Unavailable */
+            reason_if_unavailable?: string | null;
+            /** Upload Id */
+            upload_id: string;
+            /** Cached */
+            cached: boolean;
+        };
         /** MetricAggregate */
         MetricAggregate: {
             /** Unit */
@@ -936,6 +1006,31 @@ export interface components {
             /** Error */
             error?: string | null;
         };
+        /**
+         * SuggestedField
+         * @description ``value`` is what the form field would be prefilled with (null: no suggestion);
+         *     ``reason`` cites what was said or which hint was used.
+         */
+        SuggestedField: {
+            /** Value */
+            value?: string | null;
+            /**
+             * Confidence
+             * @default 0
+             */
+            confidence: number;
+            /** Reason */
+            reason?: string | null;
+        };
+        /** SuggestedFields */
+        SuggestedFields: {
+            board?: components["schemas"]["SuggestedField"];
+            grade?: components["schemas"]["SuggestedField"];
+            subject?: components["schemas"]["SuggestedField"];
+            chapter?: components["schemas"]["SuggestedField"];
+            class_type?: components["schemas"]["SuggestedField"];
+            class_composition?: components["schemas"]["SuggestedField"];
+        };
         /** TeacherGroup */
         TeacherGroup: {
             /** N Lectures */
@@ -1033,7 +1128,7 @@ export interface components {
          * UploadStatus
          * @enum {string}
          */
-        UploadStatus: "initiated" | "completed" | "aborted";
+        UploadStatus: "initiated" | "completed" | "aborted" | "expired";
         /** UploadStatusOut */
         UploadStatusOut: {
             /** Upload Id */
@@ -1216,6 +1311,13 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description too many sign-in attempts from this client IP; see `Retry-After` */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     change_password_me_password_post: {
@@ -1280,6 +1382,13 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description too many sign-in attempts from this client IP; see `Retry-After` */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     verify_auth_verify_post: {
@@ -1312,6 +1421,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description too many sign-in attempts from this client IP; see `Retry-After` */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1562,6 +1678,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UploadStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suggest_upload_metadata_uploads__upload_id__suggest_metadata_post: {
+        parameters: {
+            query?: {
+                refresh?: boolean;
+                teacher_user_id?: string | null;
+            };
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetadataSuggestionOut"];
                 };
             };
             /** @description Validation Error */

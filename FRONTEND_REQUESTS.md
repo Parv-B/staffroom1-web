@@ -89,3 +89,18 @@ parameter.
 
 **Meanwhile** the frontend accepts both: a payload that validates as a `Transcript`, or one
 whose `.transcript` does. Anything else is not shown.
+
+## 5. Participant names that contain digits are dropped
+
+**Context.** `POST /participants/parse` drops any row whose name contains a digit, as if it
+were a dial-in number. On 2026-10-21, `"E2E teacher (Host, me)\nKabir Rao"` came back with
+`dropped: 1`, `teacher_found: false` and no teacher row: the host's own row was removed. Real
+Zoom names sometimes carry digits ("Aarav 2", "Class 10B iPad", "Riya_07"), and a dropped
+student name is a name that isn't redacted.
+
+**Request.** Drop a row as a phone number only when it is mostly digits and phone punctuation
+(e.g. `+91 98765 43210`, `Call-in user 3` style labels), and keep names that merely contain a
+digit. If a row is dropped, say which kind in `warnings` (without the name).
+
+**Until then** the form shows the API's counts ("N dropped (phone numbers or meeting bots)")
+and lets the teacher add a missing name by hand with "Add a name".

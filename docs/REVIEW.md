@@ -172,3 +172,6 @@ Decisions made on your behalf:
 5. **E2E user accounts accumulate** (one deactivated `e2e-managed-…` user per run), because
    accounts can't be deleted. A backend delete for test users, or a fixed reusable test user,
    would avoid it.
+6. **Open backend request #5** (`FRONTEND_REQUESTS.md`): the participant-list parser drops any
+   name containing a digit, including the host's own row. Until it's fixed, teachers can add a
+   dropped name by hand.

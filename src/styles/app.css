@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+/* Self-hosted faces (bundled from npm; no font CDN). unicode-range subsetting means the
+   Devanagari and Arabic files are fetched only when a page contains those scripts. */
+@import "@fontsource-variable/literata/opsz.css";
+@import "@fontsource-variable/literata/opsz-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/400.css";
+@import "@fontsource/atkinson-hyperlegible-next/400-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/600.css";
+@import "@fontsource/noto-serif-devanagari/400.css";
+@import "@fontsource/noto-serif-devanagari/600.css";
+@import "@fontsource/noto-naskh-arabic/400.css";
+@import "@fontsource/noto-naskh-arabic/600.css";
+@import "@fontsource/noto-sans-devanagari/400.css";
+@import "@fontsource/noto-sans-devanagari/600.css";
+@import "@fontsource/noto-sans-arabic/400.css";
+@import "@fontsource/noto-sans-arabic/600.css";
+
+/* Digits come from Literata everywhere (the user's choice, 2026-10-21): Atkinson's slashed zero
+   made times read "Ø9:14". unicode-range limits this face to 0-9, so the letters around them stay
+   Atkinson. It is first in the UI stack below. */
+@font-face {
+  font-family: "Staffroom Figures";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("../../node_modules/@fontsource-variable/literata/files/literata-latin-opsz-normal.woff2") format("woff2-variations");
+  unicode-range: U+0030-0039;
+}
+
+/* Named palette (docs/design-plan.md). Light theme only for now. */
+:root {
+  --desk: #eef0ec;
+  --sheet: #ffffff;
+  --ink: #17201e;
+  --slate: #4c5856;
+  --pen: #1f4c8a;
+  --moss: #2c6537;
+  --ochre: #875000;
+  /* Status hues: never used for severity. */
+  --heather: #674a86;
+  --lagoon: #0e626b;
+  /* Tints: 8–10 % mixes behind text; Ink on each stays above 14:1. */
+  --moss-tint: #e7f0e6;
+  --ochre-tint: #f7eedc;
+  --pen-tint: #e6edf7;
+  --heather-tint: #efeaf5;
+  --lagoon-tint: #e2f0f1;
+  --hatch: #e3e5e1;
+
+  --font-reading: "Literata Variable", "Noto Serif Devanagari", "Noto Naskh Arabic", Georgia, serif;
+  --font-ui: "Staffroom Figures", "Atkinson Hyperlegible Next", "Noto Sans Devanagari", "Noto Sans Arabic", "Helvetica Neue", sans-serif;
+  --measure: 66ch;
+  --player-height: 3.5rem;
+  color-scheme: light;
+}
+
+@theme {
+  --color-desk: var(--desk);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-pen: var(--pen);
+  --color-moss: var(--moss);
+  --color-ochre: var(--ochre);
+  --color-heather: var(--heather);
+  --color-lagoon: var(--lagoon);
+  --color-moss-tint: var(--moss-tint);
+  --color-ochre-tint: var(--ochre-tint);
+  --color-pen-tint: var(--pen-tint);
+  --color-heather-tint: var(--heather-tint);
+  --color-lagoon-tint: var(--lagoon-tint);
+  --color-hatch: var(--hatch);
+  --font-reading: var(--font-reading);
+  --font-ui: var(--font-ui);
+  --radius-control: 3px;
+}
+
+/* Type scale: six sizes, ratio about 1.25 (docs/design-plan.md). */
+@layer components {
+  .t-display {
+    font-family: var(--font-reading);
+    font-size: 2.5rem;
+    line-height: 1.1;
+    font-weight: 600;
+    font-variation-settings: "opsz" 72;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .t-heading {
+    font-family: var(--font-reading);
+    font-size: 1.75rem;
+    line-height: 1.2;
+    font-weight: 600;
+    font-variation-settings: "opsz" 48;
+    text-wrap: balance;
+  }
+  .t-subheading {
+    font-family: var(--font-reading);
+    font-size: 1.25rem;
+    line-height: 1.35;
+    font-weight: 600;
+    font-variation-settings: "opsz" 24;
+    text-wrap: pretty;
+  }
+  .t-reading {
+    font-family: var(--font-reading);
+    font-size: 1.125rem;
+    line-height: 1.65;
+    font-weight: 400;
+    text-wrap: pretty;
+  }
+  .t-transcript {
+    font-family: var(--font-reading);
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+  .t-ui {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .t-small {
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  .nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .measure {
+    max-width: var(--measure);
+  }
+
+  /* N/A: a hatched box with no digits, so it can never be read as a zero. */
+  .na-box {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    padding: 0 0.4em;
+    border: 1px solid var(--slate);
+    border-radius: var(--radius-control);
+    background: repeating-linear-gradient(-45deg, var(--sheet) 0 4px, var(--hatch) 4px 7px);
+    color: var(--ink);
+  }
+  .lowconf-value {
+    text-decoration: underline dotted var(--heather) 2px;
+    text-underline-offset: 0.3em;
+  }
+
+  /* A link-like action: Fountain pen, underlined, so colour is never the only cue. */
+  .action {
+    color: var(--pen);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+  .action:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .button {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--pen);
+    color: var(--pen);
+    background: var(--sheet);
+  }
+  .button[data-variant="primary"] {
+    background: var(--pen);
+    color: var(--sheet);
+  }
+  .button[data-disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@layer base {
+  html {
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--desk);
+  }
+  /* One visible focus style everywhere: a 2px Fountain-pen ring, offset from the element. */
+  :focus-visible,
+  [data-focus-visible] {
+    outline: 2px solid var(--pen);
+    outline-offset: 2px;
+  }
+  /* Jumps to a transcript moment land below the docked audio player. */
+  [data-scroll-target] {
+    scroll-margin-top: calc(var(--player-height) + 1.5rem);
+  }
+}
+
+@keyframes landed {
+  from {
+    background-color: var(--pen-tint);
+  }
+}
+.just-landed {
+  animation: landed 900ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+  [data-no-print] {
+    display: none !important;
+  }
+}

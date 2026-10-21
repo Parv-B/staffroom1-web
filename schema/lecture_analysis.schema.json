@@ -1,0 +1,1317 @@
+{
+  "$defs": {
+    "ActivityType": {
+      "enum": [
+        "explanation",
+        "worked_example",
+        "student_practice",
+        "qa",
+        "admin",
+        "unclassified"
+      ],
+      "title": "ActivityType",
+      "type": "string"
+    },
+    "Category": {
+      "enum": [
+        "content_error",
+        "explanation_gap",
+        "conduct",
+        "pedagogy",
+        "strength"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "ClassComposition": {
+      "enum": [
+        "co_ed",
+        "girls",
+        "boys",
+        "unknown"
+      ],
+      "title": "ClassComposition",
+      "type": "string"
+    },
+    "ClassType": {
+      "enum": [
+        "online",
+        "in_person"
+      ],
+      "title": "ClassType",
+      "type": "string"
+    },
+    "ConductSubtype": {
+      "enum": [
+        "shaming",
+        "mocking",
+        "dismissive",
+        "gendered_language",
+        "other"
+      ],
+      "title": "ConductSubtype",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "high",
+        "low"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Coverage": {
+      "properties": {
+        "not_covered_means": {
+          "enum": [
+            "gap",
+            "not_in_this_lesson"
+          ],
+          "title": "Not Covered Means",
+          "type": "string"
+        },
+        "objective_source": {
+          "$ref": "#/$defs/ObjectiveSource"
+        },
+        "objectives": {
+          "items": {
+            "$ref": "#/$defs/Objective"
+          },
+          "minItems": 1,
+          "title": "Objectives",
+          "type": "array"
+        },
+        "objectives_reviewed": {
+          "title": "Objectives Reviewed",
+          "type": "boolean"
+        },
+        "summary_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/CoverageStatus"
+          },
+          "title": "Summary Counts",
+          "type": "object"
+        }
+      },
+      "required": [
+        "objective_source",
+        "objectives_reviewed",
+        "not_covered_means",
+        "objectives",
+        "summary_counts"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "CoverageStatus": {
+      "enum": [
+        "covered",
+        "partial",
+        "not_covered",
+        "deferred"
+      ],
+      "title": "CoverageStatus",
+      "type": "string"
+    },
+    "EvidenceRun": {
+      "description": "A run of contiguous transcript segments. Times and quote are resolved by code.",
+      "properties": {
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "segment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Segment Ids",
+          "type": "array"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segment_ids",
+        "start_ms",
+        "end_ms",
+        "quote"
+      ],
+      "title": "EvidenceRun",
+      "type": "object"
+    },
+    "Finding": {
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "claim_as_spoken": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Claim As Spoken"
+        },
+        "detector_confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Detector Confidence",
+          "type": "number"
+        },
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRun"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "finding_id": {
+          "pattern": "^f_[0-9a-f]{16}$",
+          "title": "Finding Id",
+          "type": "string"
+        },
+        "issue": {
+          "title": "Issue",
+          "type": "string"
+        },
+        "likely_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Likely Intent"
+        },
+        "metric_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Metric Refs",
+          "type": "array"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "segment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Segment Ids",
+          "type": "array"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "subtype": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConductSubtype"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "suggested_rephrasing": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggested Rephrasing"
+        },
+        "suggestion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggestion"
+        },
+        "verifier_confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Verifier Confidence",
+          "type": "number"
+        },
+        "verifier_rationale": {
+          "title": "Verifier Rationale",
+          "type": "string"
+        },
+        "verifier_verdict": {
+          "$ref": "#/$defs/Verdict"
+        },
+        "what_the_phrasing_implies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "What The Phrasing Implies"
+        },
+        "why_it_matters": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Why It Matters"
+        }
+      },
+      "required": [
+        "finding_id",
+        "category",
+        "severity",
+        "evidence",
+        "segment_ids",
+        "start_ms",
+        "end_ms",
+        "quote",
+        "issue",
+        "detector_confidence",
+        "verifier_verdict",
+        "verifier_confidence",
+        "verifier_rationale"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "FindingsSummary": {
+      "properties": {
+        "counts_by_category_and_severity": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/$defs/Severity"
+            },
+            "type": "object"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Counts By Category And Severity",
+          "type": "object"
+        },
+        "released_categories": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Released Categories",
+          "type": "array"
+        }
+      },
+      "required": [
+        "counts_by_category_and_severity"
+      ],
+      "title": "FindingsSummary",
+      "type": "object"
+    },
+    "LectureNotes": {
+      "description": "Notes for students. ``source`` \"pipeline\" is the generated draft (always\n``draft_requires_teacher_approval``); \"teacher\" is the teacher's saved version, which only\nthe teacher can edit and approve. A teacher version whose cited segments no longer exist\nafter a rerun is kept, flagged ``stale`` with a reason, never silently trimmed.",
+      "properties": {
+        "approved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved At"
+        },
+        "edited_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Edited At"
+        },
+        "markdown": {
+          "title": "Markdown",
+          "type": "string"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/NoteSection"
+          },
+          "title": "Sections",
+          "type": "array"
+        },
+        "source": {
+          "default": "pipeline",
+          "enum": [
+            "pipeline",
+            "teacher"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "stale_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stale Reason"
+        },
+        "status": {
+          "$ref": "#/$defs/NotesStatus"
+        }
+      },
+      "required": [
+        "status",
+        "sections",
+        "markdown"
+      ],
+      "title": "LectureNotes",
+      "type": "object"
+    },
+    "Metadata": {
+      "properties": {
+        "board": {
+          "title": "Board",
+          "type": "string"
+        },
+        "chapter": {
+          "title": "Chapter",
+          "type": "string"
+        },
+        "class_composition": {
+          "$ref": "#/$defs/ClassComposition"
+        },
+        "class_type": {
+          "$ref": "#/$defs/ClassType"
+        },
+        "duration_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "grade": {
+          "title": "Grade",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "teacher_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Teacher Id"
+        }
+      },
+      "required": [
+        "board",
+        "grade",
+        "subject",
+        "chapter",
+        "class_type",
+        "class_composition",
+        "duration_ms"
+      ],
+      "title": "Metadata",
+      "type": "object"
+    },
+    "MetricResult": {
+      "description": "A scalar metric. Missing data is ``value=None`` with a reason, never 0 or 100.",
+      "properties": {
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "data_source": {
+          "title": "Data Source",
+          "type": "string"
+        },
+        "definition": {
+          "title": "Definition",
+          "type": "string"
+        },
+        "kind": {
+          "const": "scalar",
+          "default": "scalar",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason_if_null": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason If Null"
+        },
+        "reason_low_confidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Low Confidence"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "unit",
+        "definition",
+        "data_source",
+        "confidence",
+        "value"
+      ],
+      "title": "MetricResult",
+      "type": "object"
+    },
+    "NoteBullet": {
+      "properties": {
+        "segment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Segment Ids",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "segment_ids"
+      ],
+      "title": "NoteBullet",
+      "type": "object"
+    },
+    "NoteSection": {
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/NoteBullet"
+          },
+          "minItems": 1,
+          "title": "Bullets",
+          "type": "array"
+        },
+        "heading": {
+          "title": "Heading",
+          "type": "string"
+        }
+      },
+      "required": [
+        "heading",
+        "bullets"
+      ],
+      "title": "NoteSection",
+      "type": "object"
+    },
+    "NotesStatus": {
+      "enum": [
+        "draft_requires_teacher_approval",
+        "approved"
+      ],
+      "title": "NotesStatus",
+      "type": "string"
+    },
+    "Objective": {
+      "properties": {
+        "evidence_segment_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Segment Ids",
+          "type": "array"
+        },
+        "objective": {
+          "title": "Objective",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CoverageStatus"
+        }
+      },
+      "required": [
+        "objective",
+        "status"
+      ],
+      "title": "Objective",
+      "type": "object"
+    },
+    "ObjectiveSource": {
+      "enum": [
+        "lesson_plan",
+        "syllabus",
+        "teacher_stated",
+        "model_knowledge"
+      ],
+      "title": "ObjectiveSource",
+      "type": "string"
+    },
+    "Problem": {
+      "properties": {
+        "concepts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Concepts",
+          "type": "array"
+        },
+        "learning_objective": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Learning Objective"
+        },
+        "problem_text": {
+          "title": "Problem Text",
+          "type": "string"
+        },
+        "segment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Segment Ids",
+          "type": "array"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/$defs/ProblemStatus"
+        }
+      },
+      "required": [
+        "problem_text",
+        "segment_ids",
+        "start_ms",
+        "status"
+      ],
+      "title": "Problem",
+      "type": "object"
+    },
+    "ProblemStatus": {
+      "enum": [
+        "solved",
+        "assigned",
+        "deferred",
+        "unknown"
+      ],
+      "title": "ProblemStatus",
+      "type": "string"
+    },
+    "Quality": {
+      "properties": {
+        "asr_provider": {
+          "title": "Asr Provider",
+          "type": "string"
+        },
+        "diarization_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diarization Confidence"
+        },
+        "diarization_method": {
+          "title": "Diarization Method",
+          "type": "string"
+        },
+        "mean_asr_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Asr Confidence"
+        },
+        "names_redacted": {
+          "title": "Names Redacted",
+          "type": "boolean"
+        },
+        "teacher_id_method": {
+          "title": "Teacher Id Method",
+          "type": "string"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "asr_provider",
+        "diarization_method",
+        "teacher_id_method",
+        "names_redacted"
+      ],
+      "title": "Quality",
+      "type": "object"
+    },
+    "Section": {
+      "properties": {
+        "activity_type": {
+          "$ref": "#/$defs/ActivityType"
+        },
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "first_segment_id": {
+          "title": "First Segment Id",
+          "type": "string"
+        },
+        "last_segment_id": {
+          "title": "Last Segment Id",
+          "type": "string"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "first_segment_id",
+        "last_segment_id",
+        "start_ms",
+        "end_ms",
+        "activity_type"
+      ],
+      "title": "Section",
+      "type": "object"
+    },
+    "Segment": {
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "lang_tags": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Lang Tags",
+          "type": "array"
+        },
+        "segment_id": {
+          "pattern": "^s\\d{4,}$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "speaker": {
+          "$ref": "#/$defs/Speaker"
+        },
+        "speaker_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speaker Label"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "text_asr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Asr"
+        },
+        "words": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Word"
+          },
+          "title": "Words",
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start_ms",
+        "end_ms",
+        "speaker",
+        "text"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "SeriesResult": {
+      "description": "A time series binned over the full lecture ``[0, duration_ms]``; empty bins are None.",
+      "properties": {
+        "bin_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Bin Ms",
+          "type": "integer"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "data_source": {
+          "title": "Data Source",
+          "type": "string"
+        },
+        "definition": {
+          "title": "Definition",
+          "type": "string"
+        },
+        "duration_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "series",
+          "default": "series",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason_low_confidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Low Confidence"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "unit",
+        "definition",
+        "data_source",
+        "confidence",
+        "bin_ms",
+        "duration_ms",
+        "values"
+      ],
+      "title": "SeriesResult",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "minor",
+        "moderate",
+        "important"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Speaker": {
+      "enum": [
+        "teacher",
+        "student",
+        "unknown"
+      ],
+      "title": "Speaker",
+      "type": "string"
+    },
+    "Structure": {
+      "properties": {
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/Section"
+          },
+          "minItems": 1,
+          "title": "Sections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sections"
+      ],
+      "title": "Structure",
+      "type": "object"
+    },
+    "TeacherSummary": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "top_findings": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Top Findings",
+          "type": "array"
+        },
+        "top_strengths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "title": "Top Strengths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "top_findings",
+        "top_strengths",
+        "text"
+      ],
+      "title": "TeacherSummary",
+      "type": "object"
+    },
+    "Transcript": {
+      "properties": {
+        "asr_provider": {
+          "title": "Asr Provider",
+          "type": "string"
+        },
+        "duration_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "title": "Segments",
+          "type": "array"
+        }
+      },
+      "required": [
+        "duration_ms",
+        "asr_provider",
+        "segments"
+      ],
+      "title": "Transcript",
+      "type": "object"
+    },
+    "Verdict": {
+      "enum": [
+        "confirmed",
+        "downgraded",
+        "rejected"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "Word": {
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lang"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "text_asr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Asr"
+        }
+      },
+      "required": [
+        "start_ms",
+        "end_ms",
+        "text"
+      ],
+      "title": "Word",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "coverage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Coverage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "findings": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Findings"
+    },
+    "findings_summary": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FindingsSummary"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "lecture_id": {
+      "title": "Lecture Id",
+      "type": "string"
+    },
+    "lecture_notes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LectureNotes"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    },
+    "metrics": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "discriminator": {
+              "mapping": {
+                "scalar": "#/$defs/MetricResult",
+                "series": "#/$defs/SeriesResult"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/MetricResult"
+              },
+              {
+                "$ref": "#/$defs/SeriesResult"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metrics"
+    },
+    "model_versions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Model Versions",
+      "type": "object"
+    },
+    "pipeline_version": {
+      "title": "Pipeline Version",
+      "type": "string"
+    },
+    "problems": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Problem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Problems"
+    },
+    "prompt_versions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Prompt Versions",
+      "type": "object"
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "structure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Structure"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "teacher_summary": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TeacherSummary"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "transcript": {
+      "$ref": "#/$defs/Transcript"
+    },
+    "unavailable": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Unavailable",
+      "type": "object"
+    }
+  },
+  "required": [
+    "lecture_id",
+    "created_at",
+    "pipeline_version",
+    "metadata",
+    "quality",
+    "transcript"
+  ],
+  "title": "LectureAnalysis",
+  "type": "object"
+}

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Label, ListBox, ListBoxItem, Popover, Select, SelectValue } from "react-aria-components";
 import type { Category } from "~/analysis/types.gen";
@@ -9,7 +9,7 @@ import { orgSummaryQuery } from "~/centre/queries";
 import { FindingCounts } from "~/components/FindingCounts";
 import { MetricValue } from "~/components/MetricValue";
 import { StatusMark } from "~/components/StatusMark";
-import { PAGE_SIZE, lectureListQuery, type LectureListFilters } from "~/lectures/queries";
+import { PAGE_SIZE, lectureListQuery, markSeen, type LectureListFilters } from "~/lectures/queries";
 import { STATUS_LABEL, STATUS_ORDER, lectureFacts, lectureTitle, type LectureStatus, type LectureSummary } from "~/lectures/vocab";
 import { longDate } from "~/lib/format";
 import { metricLabel } from "~/metrics/labels";
@@ -142,6 +142,7 @@ function LectureRow({
         <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className={`t-small font-semibold ${l.status === "failed" ? "text-ink" : "text-slate"}`}>{STATUS_LABEL[l.status]}</span>
           <SharingMark shared={l.shared_with_owner} role={role} />
+          {l.has_unseen_results ? <NewResults lectureId={l.lecture_id} /> : null}
         </p>
       </div>
 
@@ -161,6 +162,29 @@ function LectureRow({
         <KeyMetrics lecture={l} />
       </div>
     </li>
+  );
+}
+
+/** "New results" since this person last opened the analysis; cleared by opening it or here. */
+function NewResults({ lectureId }: { lectureId: string }) {
+  const queryClient = useQueryClient();
+  const seen = useMutation({
+    mutationFn: () => markSeen(lectureId),
+    onSuccess: () => {
+      queryClient.setQueriesData<{ items: LectureSummary[] }>({ queryKey: ["lectures", "list"] }, (old) =>
+        old ? { ...old, items: old.items.map((i) => (i.lecture_id === lectureId ? { ...i, has_unseen_results: false } : i)) } : old,
+      );
+      void queryClient.invalidateQueries({ queryKey: ["lecture", lectureId, "detail"] });
+    },
+  });
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-2" data-new-results>
+      <StatusMark kind="new-results" />
+      <Button className="action t-small" isDisabled={seen.isPending} onPress={() => { seen.mutate(); }}>
+        Mark as seen
+      </Button>
+      {seen.isError ? <span className="t-small" role="alert">Not marked. Try again.</span> : null}
+    </span>
   );
 }
 

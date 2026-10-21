@@ -29,3 +29,8 @@ export const lectureListQuery = (f: LectureListFilters) =>
     // Lectures in progress change status; keep the list reasonably fresh.
     refetchInterval: (q) => (q.state.data?.items.some((i) => i.status === "queued" || i.status === "running") ? 15_000 : false),
   });
+
+/** Clears the "New results" mark for the signed-in user. */
+export function markSeen(lectureId: string) {
+  return unwrap(api.POST("/lectures/{lecture_id}/seen", { params: { path: { lecture_id: lectureId } } }));
+}

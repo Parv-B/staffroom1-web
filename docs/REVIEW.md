@@ -133,6 +133,29 @@ Decisions made on your behalf:
 - The lecture page says "Uploaded with a participant list with N students and the meeting's
   chat" when they were given; names never come back.
 
+## Backend changelog items 3–5: edit details, responses to findings, new results
+
+| Screen | Role | Screenshot |
+|---|---|---|
+| Edit details, with what saving will do | teacher (and admin) | ![](../screenshots/edit-details-teacher.png) |
+| Confirmation before reprocessing | teacher | ![](../screenshots/edit-details-confirm-teacher.png) |
+| Responses to findings | admin | ![](../screenshots/feedback-admin.png) |
+| "New results" mark in the list (list answer adjusted in the browser: no real lecture has one yet) | teacher | ![](../screenshots/lectures-new-results-teacher.png) |
+
+Decisions made on your behalf:
+- **Edit details** is a link under the lecture title (lecture's teacher and admins; never owners;
+  hidden while processing). A side panel says, as you change fields, which parts of the
+  analysis are worked out again (from the API's field table), and a confirmation repeats it.
+  After saving, the status page names the stages the API actually queued. Re-transcription is
+  **not offered** (it renumbers segments, stales notes and costs ASR time); only the API has it.
+  `409 already_queued` and `media_deleted` are explained in place.
+- **Responses to findings** (`/admin/feedback`, admins only): one row per category with the
+  counts as given (findings, agree, disagree, needs context, no response), a per-severity
+  breakdown for review categories, and copy saying it's about the findings, not teachers. No
+  agreement percentage is shown at all, so there's no share without its `n`. No date filter yet.
+- **New results** is a quiet ink mark with a dot (not a colour that reads good or bad), with
+  "Mark as seen" beside it. Opening the analysis clears it in the cached list too.
+
 ## Needs your decision
 1. **Wording for categories a lecture was never checked for.** Rule 6's phrase "Not yet reported
    (still being validated)" is used everywhere. For lectures processed before a category was

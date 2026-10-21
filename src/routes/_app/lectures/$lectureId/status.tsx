@@ -8,12 +8,15 @@ import { STAGES } from "~/lectures/stages";
 import { StatusView, type EstimateState } from "~/lectures/StatusView";
 
 export const Route = createFileRoute("/_app/lectures/$lectureId/status")({
+  // After a details edit: which parts are being worked out again (from the API's answer).
+  validateSearch: (s: Record<string, unknown>): { edited?: string } => (typeof s.edited === "string" && s.edited.length < 300 ? { edited: s.edited } : {}),
   component: StatusPage,
 });
 
 function StatusPage() {
   const { lectureId } = Route.useParams();
   const { me } = Route.useRouteContext();
+  const { edited } = Route.useSearch();
   const detail = useQuery(lectureDetailQuery(lectureId));
   const d = detail.data;
   const inProgress = d ? isInProgress(d.status) : false;
@@ -30,6 +33,11 @@ function StatusPage() {
       <h2 id="status-heading" className="t-heading">
         Processing
       </h2>
+      {edited ? (
+        <p className="t-small measure mt-3 border-l-[3px] border-pen py-1 pl-3" role="status">
+          Details saved. Being worked out again: {edited}.
+        </p>
+      ) : null}
       <div className="mt-4">
         <StatusView detail={d} role={me.role} estimate={estimate} now={now} />
       </div>

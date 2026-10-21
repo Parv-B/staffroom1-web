@@ -16,12 +16,14 @@ import { Route as StyleTileRouteImport } from "./routes/style-tile"
 import { Route as AppCentreRouteImport } from "./routes/_app/centre"
 import { Route as AppProgressRouteImport } from "./routes/_app/progress"
 import { Route as AppAccountPasswordRouteImport } from "./routes/_app/account/password"
+import { Route as AppAdminFeedbackRouteImport } from "./routes/_app/admin/feedback"
 import { Route as AppAdminUsersRouteImport } from "./routes/_app/admin/users"
 import { Route as AppLecturesIndexRouteImport } from "./routes/_app/lectures/index"
 import { Route as AppLecturesLectureIdRouteRouteImport } from "./routes/_app/lectures/$lectureId/route"
 import { Route as AppLecturesNewRouteImport } from "./routes/_app/lectures/new"
 import { Route as AppLecturesLectureIdIndexRouteImport } from "./routes/_app/lectures/$lectureId/index"
 import { Route as AppLecturesLectureIdAnalysisRouteRouteImport } from "./routes/_app/lectures/$lectureId/analysis/route"
+import { Route as AppLecturesLectureIdEditRouteImport } from "./routes/_app/lectures/$lectureId/edit"
 import { Route as AppLecturesLectureIdNotesRouteImport } from "./routes/_app/lectures/$lectureId/notes"
 import { Route as AppLecturesLectureIdStatusRouteImport } from "./routes/_app/lectures/$lectureId/status"
 import { Route as AppLecturesLectureIdTranscriptRouteImport } from "./routes/_app/lectures/$lectureId/transcript"
@@ -65,6 +67,11 @@ const AppAccountPasswordRoute = AppAccountPasswordRouteImport.update({
   path: "/account/password",
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminFeedbackRoute = AppAdminFeedbackRouteImport.update({
+  id: "/admin/feedback",
+  path: "/admin/feedback",
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
   id: "/admin/users",
   path: "/admin/users",
@@ -96,6 +103,12 @@ const AppLecturesLectureIdAnalysisRouteRoute =
   AppLecturesLectureIdAnalysisRouteRouteImport.update({
     id: "/analysis",
     path: "/analysis",
+    getParentRoute: () => AppLecturesLectureIdRouteRoute,
+  } as any)
+const AppLecturesLectureIdEditRoute =
+  AppLecturesLectureIdEditRouteImport.update({
+    id: "/edit",
+    path: "/edit",
     getParentRoute: () => AppLecturesLectureIdRouteRoute,
   } as any)
 const AppLecturesLectureIdNotesRoute =
@@ -155,10 +168,12 @@ export interface FileRoutesByFullPath {
   "/progress": typeof AppProgressRoute
   "/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/account/password": typeof AppAccountPasswordRoute
+  "/admin/feedback": typeof AppAdminFeedbackRoute
   "/admin/users": typeof AppAdminUsersRoute
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures/": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/lectures/$lectureId/edit": typeof AppLecturesLectureIdEditRoute
   "/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
@@ -176,10 +191,12 @@ export interface FileRoutesByTo {
   "/centre": typeof AppCentreRoute
   "/progress": typeof AppProgressRoute
   "/account/password": typeof AppAccountPasswordRoute
+  "/admin/feedback": typeof AppAdminFeedbackRoute
   "/admin/users": typeof AppAdminUsersRoute
   "/lectures/new": typeof AppLecturesNewRoute
   "/lectures": typeof AppLecturesIndexRoute
   "/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/lectures/$lectureId/edit": typeof AppLecturesLectureIdEditRoute
   "/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
@@ -200,10 +217,12 @@ export interface FileRoutesById {
   "/_app/progress": typeof AppProgressRoute
   "/_app/lectures/$lectureId": typeof AppLecturesLectureIdRouteRouteWithChildren
   "/_app/account/password": typeof AppAccountPasswordRoute
+  "/_app/admin/feedback": typeof AppAdminFeedbackRoute
   "/_app/admin/users": typeof AppAdminUsersRoute
   "/_app/lectures/new": typeof AppLecturesNewRoute
   "/_app/lectures/": typeof AppLecturesIndexRoute
   "/_app/lectures/$lectureId/analysis": typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  "/_app/lectures/$lectureId/edit": typeof AppLecturesLectureIdEditRoute
   "/_app/lectures/$lectureId/notes": typeof AppLecturesLectureIdNotesRoute
   "/_app/lectures/$lectureId/status": typeof AppLecturesLectureIdStatusRoute
   "/_app/lectures/$lectureId/transcript": typeof AppLecturesLectureIdTranscriptRoute
@@ -224,10 +243,12 @@ export interface FileRouteTypes {
     | "/progress"
     | "/lectures/$lectureId"
     | "/account/password"
+    | "/admin/feedback"
     | "/admin/users"
     | "/lectures/new"
     | "/lectures/"
     | "/lectures/$lectureId/analysis"
+    | "/lectures/$lectureId/edit"
     | "/lectures/$lectureId/notes"
     | "/lectures/$lectureId/status"
     | "/lectures/$lectureId/transcript"
@@ -245,10 +266,12 @@ export interface FileRouteTypes {
     | "/centre"
     | "/progress"
     | "/account/password"
+    | "/admin/feedback"
     | "/admin/users"
     | "/lectures/new"
     | "/lectures"
     | "/lectures/$lectureId/analysis"
+    | "/lectures/$lectureId/edit"
     | "/lectures/$lectureId/notes"
     | "/lectures/$lectureId/status"
     | "/lectures/$lectureId/transcript"
@@ -268,10 +291,12 @@ export interface FileRouteTypes {
     | "/_app/progress"
     | "/_app/lectures/$lectureId"
     | "/_app/account/password"
+    | "/_app/admin/feedback"
     | "/_app/admin/users"
     | "/_app/lectures/new"
     | "/_app/lectures/"
     | "/_app/lectures/$lectureId/analysis"
+    | "/_app/lectures/$lectureId/edit"
     | "/_app/lectures/$lectureId/notes"
     | "/_app/lectures/$lectureId/status"
     | "/_app/lectures/$lectureId/transcript"
@@ -341,6 +366,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppAccountPasswordRouteImport
       parentRoute: typeof AppRoute
     }
+    "/_app/admin/feedback": {
+      id: "/_app/admin/feedback"
+      path: "/admin/feedback"
+      fullPath: "/admin/feedback"
+      preLoaderRoute: typeof AppAdminFeedbackRouteImport
+      parentRoute: typeof AppRoute
+    }
     "/_app/admin/users": {
       id: "/_app/admin/users"
       path: "/admin/users"
@@ -381,6 +413,13 @@ declare module "@tanstack/react-router" {
       path: "/analysis"
       fullPath: "/lectures/$lectureId/analysis"
       preLoaderRoute: typeof AppLecturesLectureIdAnalysisRouteRouteImport
+      parentRoute: typeof AppLecturesLectureIdRouteRoute
+    }
+    "/_app/lectures/$lectureId/edit": {
+      id: "/_app/lectures/$lectureId/edit"
+      path: "/edit"
+      fullPath: "/lectures/$lectureId/edit"
+      preLoaderRoute: typeof AppLecturesLectureIdEditRouteImport
       parentRoute: typeof AppLecturesLectureIdRouteRoute
     }
     "/_app/lectures/$lectureId/notes": {
@@ -471,6 +510,7 @@ const AppLecturesLectureIdAnalysisRouteRouteWithChildren =
 
 interface AppLecturesLectureIdRouteRouteChildren {
   AppLecturesLectureIdAnalysisRouteRoute: typeof AppLecturesLectureIdAnalysisRouteRouteWithChildren
+  AppLecturesLectureIdEditRoute: typeof AppLecturesLectureIdEditRoute
   AppLecturesLectureIdNotesRoute: typeof AppLecturesLectureIdNotesRoute
   AppLecturesLectureIdStatusRoute: typeof AppLecturesLectureIdStatusRoute
   AppLecturesLectureIdTranscriptRoute: typeof AppLecturesLectureIdTranscriptRoute
@@ -481,6 +521,7 @@ const AppLecturesLectureIdRouteRouteChildren: AppLecturesLectureIdRouteRouteChil
   {
     AppLecturesLectureIdAnalysisRouteRoute:
       AppLecturesLectureIdAnalysisRouteRouteWithChildren,
+    AppLecturesLectureIdEditRoute: AppLecturesLectureIdEditRoute,
     AppLecturesLectureIdNotesRoute: AppLecturesLectureIdNotesRoute,
     AppLecturesLectureIdStatusRoute: AppLecturesLectureIdStatusRoute,
     AppLecturesLectureIdTranscriptRoute: AppLecturesLectureIdTranscriptRoute,
@@ -497,6 +538,7 @@ interface AppRouteChildren {
   AppProgressRoute: typeof AppProgressRoute
   AppLecturesLectureIdRouteRoute: typeof AppLecturesLectureIdRouteRouteWithChildren
   AppAccountPasswordRoute: typeof AppAccountPasswordRoute
+  AppAdminFeedbackRoute: typeof AppAdminFeedbackRoute
   AppAdminUsersRoute: typeof AppAdminUsersRoute
   AppLecturesNewRoute: typeof AppLecturesNewRoute
   AppLecturesIndexRoute: typeof AppLecturesIndexRoute
@@ -507,6 +549,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProgressRoute: AppProgressRoute,
   AppLecturesLectureIdRouteRoute: AppLecturesLectureIdRouteRouteWithChildren,
   AppAccountPasswordRoute: AppAccountPasswordRoute,
+  AppAdminFeedbackRoute: AppAdminFeedbackRoute,
   AppAdminUsersRoute: AppAdminUsersRoute,
   AppLecturesNewRoute: AppLecturesNewRoute,
   AppLecturesIndexRoute: AppLecturesIndexRoute,

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "not-shared" | "suggested" | "suggested-tentative";
+export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "not-shared" | "suggested" | "suggested-tentative" | "new-results";
 
 // Each status has its own hue AND its own shape and word, so none relies on colour alone, and
 // none borrows a severity colour.
@@ -18,6 +18,8 @@ const STYLE: Record<StatusKind, { className: string; icon: ReactNode; label: str
   // a weak one uses the low-confidence hue.
   suggested: { className: "text-slate border border-dashed border-slate", icon: <Pencil />, label: "Suggested from the recording" },
   "suggested-tentative": { className: "text-heather border border-dashed border-heather", icon: <HalfCircle />, label: "Tentative suggestion" },
+  // Neutral news, not good or bad: Ink on Sheet with a small dot.
+  "new-results": { className: "text-ink border border-ink", icon: <Dot />, label: "New results" },
 };
 
 export function StatusMark({ kind, children }: { kind: StatusKind; children?: ReactNode }) {
@@ -66,6 +68,13 @@ function Check() {
   return (
     <Svg>
       <path d="M3 8.5l3 3 7-7" />
+    </Svg>
+  );
+}
+function Dot() {
+  return (
+    <Svg>
+      <circle cx="8" cy="8" r="3" fill="currentColor" stroke="none" />
     </Svg>
   );
 }

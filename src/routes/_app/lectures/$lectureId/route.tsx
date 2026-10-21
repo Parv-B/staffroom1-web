@@ -5,7 +5,7 @@ import { isApiError } from "~/api/client";
 import type { Role } from "~/auth/session";
 import { orgSummaryQuery } from "~/centre/queries";
 import { StatusMark } from "~/components/StatusMark";
-import { lectureDetailQuery, setShared, type LectureDetail } from "~/lectures/detail";
+import { isInProgress, lectureDetailQuery, setShared, type LectureDetail } from "~/lectures/detail";
 import { STATUS_LABEL, lectureFacts, lectureTitle } from "~/lectures/vocab";
 import { longDate } from "~/lib/format";
 import { PlayerProvider } from "~/media/player";
@@ -48,6 +48,14 @@ function LectureLayout() {
           {done ? null : ` ${STATUS_LABEL[d.status]}.`}
         </p>
         <Sharing detail={d} role={me.role} isOwnLecture={d.teacher_user_id === me.user_id} />
+        {(me.role === "admin" || (me.role === "teacher" && d.teacher_user_id === me.user_id)) && !isInProgress(d.status) ? (
+          <p className="t-small mt-3" data-no-print>
+            <Link to="/lectures/$lectureId/edit" params={{ lectureId }} className="action">
+              Edit details
+            </Link>
+            <span className="text-slate"> (board, grade, subject, chapter, class, objectives)</span>
+          </p>
+        ) : null}
       </header>
       <Tabs lectureId={lectureId} done={done} />
       <div className="bg-sheet px-5 pt-2 pb-12 sm:px-10">

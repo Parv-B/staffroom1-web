@@ -61,6 +61,11 @@ function Header({ me }: { me: Me }) {
             Users
           </Link>
         ) : null}
+        {can.manageUsers(me.role) ? (
+          <Link to="/admin/feedback" className={navLink}>
+            Responses to findings
+          </Link>
+        ) : null}
       </nav>
       <MenuTrigger>
         <Button className="t-small ml-auto rounded-[3px] px-2 py-1 text-left hover:bg-sheet">

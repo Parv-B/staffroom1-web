@@ -1006,6 +1006,54 @@
         }
       }
     },
+    "/lectures/{lecture_id}/seen": {
+      "post": {
+        "tags": [
+          "lectures"
+        ],
+        "summary": "Mark Lecture Seen",
+        "description": "Mark the lecture's current results as seen by the caller (e.g. \"mark as read\" in a\nlist) without opening the analysis.",
+        "operationId": "mark_lecture_seen_lectures__lecture_id__seen_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lecture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lecture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeenOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lectures/{lecture_id}/transcript": {
       "get": {
         "tags": [
@@ -1681,6 +1729,79 @@
           }
         }
       }
+    },
+    "/org/feedback-summary": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "summary": "Feedback Summary",
+        "description": "How teachers judged the findings, per category and severity: whether the released\ncategories are trustworthy. Counts only: no comments, names or per-teacher split.",
+        "operationId": "feedback_summary_org_feedback_summary_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackSummaryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1718,6 +1839,26 @@
           "strength"
         ],
         "title": "Category"
+      },
+      "CategoryFeedback": {
+        "properties": {
+          "total": {
+            "$ref": "#/components/schemas/VerdictCounts"
+          },
+          "by_severity": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/VerdictCounts"
+            },
+            "type": "object",
+            "title": "By Severity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "by_severity"
+        ],
+        "title": "CategoryFeedback"
       },
       "ClassComposition": {
         "type": "string",
@@ -1841,6 +1982,66 @@
           "created_at"
         ],
         "title": "FeedbackOut"
+      },
+      "FeedbackSummaryOut": {
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "title": "Org Id"
+          },
+          "from_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Date"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Date"
+          },
+          "released_categories": {
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            },
+            "type": "array",
+            "title": "Released Categories"
+          },
+          "n_lectures": {
+            "type": "integer",
+            "title": "N Lectures"
+          },
+          "categories": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CategoryFeedback"
+            },
+            "type": "object",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "org_id",
+          "from_date",
+          "to_date",
+          "released_categories",
+          "n_lectures",
+          "categories"
+        ],
+        "title": "FeedbackSummaryOut"
       },
       "FeedbackVerdict": {
         "type": "string",
@@ -2058,6 +2259,11 @@
           "has_chat": {
             "type": "boolean",
             "title": "Has Chat",
+            "default": false
+          },
+          "has_unseen_results": {
+            "type": "boolean",
+            "title": "Has Unseen Results",
             "default": false
           },
           "created_at": {
@@ -2280,6 +2486,11 @@
           "has_chat": {
             "type": "boolean",
             "title": "Has Chat",
+            "default": false
+          },
+          "has_unseen_results": {
+            "type": "boolean",
+            "title": "Has Unseen Results",
             "default": false
           },
           "created_at": {
@@ -3422,6 +3633,30 @@
         ],
         "title": "SectionIn"
       },
+      "SeenOut": {
+        "properties": {
+          "lecture_id": {
+            "type": "string",
+            "title": "Lecture Id"
+          },
+          "has_unseen_results": {
+            "type": "boolean",
+            "title": "Has Unseen Results"
+          },
+          "seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Seen At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lecture_id",
+          "has_unseen_results",
+          "seen_at"
+        ],
+        "title": "SeenOut"
+      },
       "Segment": {
         "properties": {
           "segment_id": {
@@ -4213,6 +4448,39 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerdictCounts": {
+        "properties": {
+          "n_findings": {
+            "type": "integer",
+            "title": "N Findings"
+          },
+          "agree": {
+            "type": "integer",
+            "title": "Agree"
+          },
+          "disagree": {
+            "type": "integer",
+            "title": "Disagree"
+          },
+          "needs_context": {
+            "type": "integer",
+            "title": "Needs Context"
+          },
+          "no_feedback": {
+            "type": "integer",
+            "title": "No Feedback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "n_findings",
+          "agree",
+          "disagree",
+          "needs_context",
+          "no_feedback"
+        ],
+        "title": "VerdictCounts"
       },
       "VerifyIn": {
         "properties": {

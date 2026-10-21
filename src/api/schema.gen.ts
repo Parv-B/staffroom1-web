@@ -341,6 +341,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lectures/{lecture_id}/seen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark Lecture Seen
+         * @description Mark the lecture's current results as seen by the caller (e.g. "mark as read" in a
+         *     list) without opening the analysis.
+         */
+        post: operations["mark_lecture_seen_lectures__lecture_id__seen_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lectures/{lecture_id}/transcript": {
         parameters: {
             query?: never;
@@ -524,6 +545,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/org/feedback-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feedback Summary
+         * @description How teachers judged the findings, per category and severity: whether the released
+         *     categories are trustworthy. Counts only: no comments, names or per-teacher split.
+         */
+        get: operations["feedback_summary_org_feedback_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -540,6 +582,14 @@ export interface components {
          * @enum {string}
          */
         Category: "content_error" | "explanation_gap" | "conduct" | "pedagogy" | "strength";
+        /** CategoryFeedback */
+        CategoryFeedback: {
+            total: components["schemas"]["VerdictCounts"];
+            /** By Severity */
+            by_severity: {
+                [key: string]: components["schemas"]["VerdictCounts"];
+            };
+        };
         /**
          * ClassComposition
          * @enum {string}
@@ -587,6 +637,23 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** FeedbackSummaryOut */
+        FeedbackSummaryOut: {
+            /** Org Id */
+            org_id: string;
+            /** From Date */
+            from_date: string | null;
+            /** To Date */
+            to_date: string | null;
+            /** Released Categories */
+            released_categories: components["schemas"]["Category"][];
+            /** N Lectures */
+            n_lectures: number;
+            /** Categories */
+            categories: {
+                [key: string]: components["schemas"]["CategoryFeedback"];
+            };
         };
         /**
          * FeedbackVerdict
@@ -676,6 +743,11 @@ export interface components {
              */
             has_chat: boolean;
             /**
+             * Has Unseen Results
+             * @default false
+             */
+            has_unseen_results: boolean;
+            /**
              * Created At
              * Format: date-time
              */
@@ -754,6 +826,11 @@ export interface components {
              * @default false
              */
             has_chat: boolean;
+            /**
+             * Has Unseen Results
+             * @default false
+             */
+            has_unseen_results: boolean;
             /**
              * Created At
              * Format: date-time
@@ -1121,6 +1198,18 @@ export interface components {
             /** Bullets */
             bullets: components["schemas"]["BulletIn"][];
         };
+        /** SeenOut */
+        SeenOut: {
+            /** Lecture Id */
+            lecture_id: string;
+            /** Has Unseen Results */
+            has_unseen_results: boolean;
+            /**
+             * Seen At
+             * Format: date-time
+             */
+            seen_at: string;
+        };
         /** Segment */
         Segment: {
             /** Segment Id */
@@ -1404,6 +1493,19 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VerdictCounts */
+        VerdictCounts: {
+            /** N Findings */
+            n_findings: number;
+            /** Agree */
+            agree: number;
+            /** Disagree */
+            disagree: number;
+            /** Needs Context */
+            needs_context: number;
+            /** No Feedback */
+            no_feedback: number;
         };
         /** VerifyIn */
         VerifyIn: {
@@ -2144,6 +2246,37 @@ export interface operations {
             };
         };
     };
+    mark_lecture_seen_lectures__lecture_id__seen_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lecture_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeenOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_transcript_lectures__lecture_id__transcript_get: {
         parameters: {
             query?: {
@@ -2525,6 +2658,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    feedback_summary_org_feedback_summary_get: {
+        parameters: {
+            query?: {
+                from?: string | null;
+                to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSummaryOut"];
                 };
             };
             /** @description Validation Error */

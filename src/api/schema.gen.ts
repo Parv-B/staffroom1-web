@@ -246,6 +246,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/participants/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Parse */
+        post: operations["parse_participants_parse_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lectures": {
         parameters: {
             query?: never;
@@ -378,6 +395,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lectures/{lecture_id}/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit Metadata
+         * @description Change the lecture's metadata and reprocess what depends on it. The teacher's edited
+         *     notes are kept (flagged stale if the transcript's segments change).
+         */
+        patch: operations["edit_metadata_lectures__lecture_id__metadata_patch"];
+        trace?: never;
+    };
     "/lectures/{lecture_id}/share": {
         parameters: {
             query?: never;
@@ -502,6 +540,16 @@ export interface components {
          * @enum {string}
          */
         Category: "content_error" | "explanation_gap" | "conduct" | "pedagogy" | "strength";
+        /**
+         * ClassComposition
+         * @enum {string}
+         */
+        ClassComposition: "co_ed" | "girls" | "boys" | "unknown";
+        /**
+         * ClassType
+         * @enum {string}
+         */
+        ClassType: "online" | "in_person";
         /** CompleteIn */
         CompleteIn: {
             /**
@@ -620,6 +668,13 @@ export interface components {
             duration_ms?: number | null;
             /** Released Categories */
             released_categories?: components["schemas"]["Category"][] | null;
+            /** Participant Count */
+            participant_count?: number | null;
+            /**
+             * Has Chat
+             * @default false
+             */
+            has_chat: boolean;
             /**
              * Created At
              * Format: date-time
@@ -692,6 +747,13 @@ export interface components {
             duration_ms?: number | null;
             /** Released Categories */
             released_categories?: components["schemas"]["Category"][] | null;
+            /** Participant Count */
+            participant_count?: number | null;
+            /**
+             * Has Chat
+             * @default false
+             */
+            has_chat: boolean;
             /**
              * Created At
              * Format: date-time
@@ -732,6 +794,52 @@ export interface components {
             content_type: string | null;
             /** Size Bytes */
             size_bytes: number | null;
+        };
+        /** MetadataEditOut */
+        MetadataEditOut: {
+            /** Lecture Id */
+            lecture_id: string;
+            status: components["schemas"]["LectureStatus"];
+            /** Metadata */
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Changed Fields */
+            changed_fields: string[];
+            /** Affected Stages */
+            affected_stages: string[];
+            /** Rerun From */
+            rerun_from: string | null;
+            /** Job Queued */
+            job_queued: boolean;
+        };
+        /**
+         * MetadataPatch
+         * @description Fields of ``LectureMetadataInput`` to change (omitted = unchanged); the merged result is
+         *     validated like creation.
+         */
+        MetadataPatch: {
+            /** Board */
+            board?: string | null;
+            /** Grade */
+            grade?: string | null;
+            /** Subject */
+            subject?: string | null;
+            /** Chapter */
+            chapter?: string | null;
+            class_type?: components["schemas"]["ClassType"] | null;
+            class_composition?: components["schemas"]["ClassComposition"] | null;
+            /** Teacher Id */
+            teacher_id?: string | null;
+            /** Lesson Plan */
+            lesson_plan?: string | null;
+            /** Objectives */
+            objectives?: string[] | null;
+            /**
+             * Retranscribe
+             * @default false
+             */
+            retranscribe: boolean;
         };
         /**
          * MetadataSuggestionOut
@@ -901,6 +1009,43 @@ export interface components {
             part_number: number;
             /** Url */
             url: string;
+        };
+        /** Participant */
+        Participant: {
+            /** Display Name */
+            display_name: string;
+        };
+        /** Participants */
+        Participants: {
+            teacher?: components["schemas"]["Participant"] | null;
+            /**
+             * Students
+             * @default []
+             */
+            students: components["schemas"]["Participant"][];
+        };
+        /** ParticipantsParseIn */
+        ParticipantsParseIn: {
+            /** Text */
+            text: string;
+            /** Teacher Name */
+            teacher_name?: string | null;
+        };
+        /** ParticipantsParseOut */
+        ParticipantsParseOut: {
+            participants: components["schemas"]["Participants"];
+            /** Teacher Found */
+            teacher_found: boolean;
+            /** Source Format */
+            source_format: string;
+            /** Rows Read */
+            rows_read: number;
+            /** Dropped */
+            dropped: number;
+            /** Duplicates */
+            duplicates: number;
+            /** Warnings */
+            warnings: string[];
         };
         /** PartsIn */
         PartsIn: {
@@ -1149,10 +1294,17 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
         };
+        /**
+         * UploadKind
+         * @enum {string}
+         */
+        UploadKind: "media" | "chat";
         /** UploadOut */
         UploadOut: {
             /** Upload Id */
             upload_id: string;
+            /** @default media */
+            kind: components["schemas"]["UploadKind"];
             /**
              * Mode
              * @enum {string}
@@ -1275,16 +1427,6 @@ export interface components {
             /** Lang */
             lang?: string | null;
         };
-        /**
-         * ClassComposition
-         * @enum {string}
-         */
-        ClassComposition: "co_ed" | "girls" | "boys" | "unknown";
-        /**
-         * ClassType
-         * @enum {string}
-         */
-        ClassType: "online" | "in_person";
         /** LectureCreateJSON */
         LectureCreateJSON: {
             /** Upload Id */
@@ -1295,6 +1437,13 @@ export interface components {
              * @default null
              */
             teacher_user_id: string | null;
+            /** @default null */
+            participants: components["schemas"]["Participants"] | null;
+            /**
+             * Chat Upload Id
+             * @default null
+             */
+            chat_upload_id: string | null;
         };
         /** LectureMetadataInput */
         LectureMetadataInput: {
@@ -1801,6 +1950,39 @@ export interface operations {
             };
         };
     };
+    parse_participants_parse_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipantsParseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantsParseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_lectures_lectures_get: {
         parameters: {
             query?: {
@@ -1851,6 +2033,9 @@ export interface operations {
                     /** @description LectureMetadataInput as a JSON string */
                     metadata: string;
                     teacher_user_id?: string;
+                    /** @description Participants as a JSON string (optional) */
+                    participants?: string;
+                    chat_upload_id?: string;
                 };
             };
         };
@@ -2043,6 +2228,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RerunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_metadata_lectures__lecture_id__metadata_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lecture_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetadataPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetadataEditOut"];
                 };
             };
             /** @description Validation Error */

@@ -65,7 +65,7 @@ test("suggestions fill only untouched fields, are marked with reasons, and never
     await route.fulfill({ json: SUGGESTION });
   });
   await page.goto("/lectures/new");
-  await page.locator("input[type=file]").setInputFiles(filePath);
+  await page.locator("input[type=file]").first().setInputFiles(filePath);
   await expect(page.getByText(/is uploaded/)).toBeVisible();
   await expect(page.getByText("Suggesting details from the recording.", { exact: false })).toBeVisible();
 
@@ -99,7 +99,7 @@ test("with suggestions switched off, the form is left exactly as it is", async (
   await signIn(page, "teacher");
   await stageUpload(page, (route) => route.fulfill({ status: 404, json: { error: { code: "not_enabled", message: "suggestions are switched off" } } }));
   await page.goto("/lectures/new");
-  await page.locator("input[type=file]").setInputFiles(filePath);
+  await page.locator("input[type=file]").first().setInputFiles(filePath);
   await expect(page.getByText(/is uploaded/)).toBeVisible();
   await page.waitForTimeout(1000);
   await expect(page.locator("[data-suggest-status]")).toHaveCount(0);

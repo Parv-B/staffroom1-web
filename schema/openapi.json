@@ -659,6 +659,52 @@
         }
       }
     },
+    "/participants/parse": {
+      "post": {
+        "tags": [
+          "participants"
+        ],
+        "summary": "Parse",
+        "operationId": "parse_participants_parse_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipantsParseIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantsParseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/lectures": {
       "post": {
         "tags": [
@@ -708,6 +754,13 @@
                     "description": "LectureMetadataInput as a JSON string"
                   },
                   "teacher_user_id": {
+                    "type": "string"
+                  },
+                  "participants": {
+                    "type": "string",
+                    "description": "Participants as a JSON string (optional)"
+                  },
+                  "chat_upload_id": {
                     "type": "string"
                   }
                 }
@@ -1105,6 +1158,64 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RerunOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lectures/{lecture_id}/metadata": {
+      "patch": {
+        "tags": [
+          "lectures"
+        ],
+        "summary": "Edit Metadata",
+        "description": "Change the lecture's metadata and reprocess what depends on it. The teacher's edited\nnotes are kept (flagged stale if the transcript's segments change).",
+        "operationId": "edit_metadata_lectures__lecture_id__metadata_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lecture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lecture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataEditOut"
                 }
               }
             }
@@ -1608,6 +1719,24 @@
         ],
         "title": "Category"
       },
+      "ClassComposition": {
+        "type": "string",
+        "enum": [
+          "co_ed",
+          "girls",
+          "boys",
+          "unknown"
+        ],
+        "title": "ClassComposition"
+      },
+      "ClassType": {
+        "type": "string",
+        "enum": [
+          "online",
+          "in_person"
+        ],
+        "title": "ClassType"
+      },
       "CompleteIn": {
         "properties": {
           "parts": {
@@ -1915,6 +2044,22 @@
             ],
             "title": "Released Categories"
           },
+          "participant_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Count"
+          },
+          "has_chat": {
+            "type": "boolean",
+            "title": "Has Chat",
+            "default": false
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2121,6 +2266,22 @@
             ],
             "title": "Released Categories"
           },
+          "participant_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Count"
+          },
+          "has_chat": {
+            "type": "boolean",
+            "title": "Has Chat",
+            "default": false
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2252,6 +2413,175 @@
           "size_bytes"
         ],
         "title": "MediaOut"
+      },
+      "MetadataEditOut": {
+        "properties": {
+          "lecture_id": {
+            "type": "string",
+            "title": "Lecture Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LectureStatus"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "changed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed Fields"
+          },
+          "affected_stages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Affected Stages"
+          },
+          "rerun_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rerun From"
+          },
+          "job_queued": {
+            "type": "boolean",
+            "title": "Job Queued"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lecture_id",
+          "status",
+          "metadata",
+          "changed_fields",
+          "affected_stages",
+          "rerun_from",
+          "job_queued"
+        ],
+        "title": "MetadataEditOut"
+      },
+      "MetadataPatch": {
+        "properties": {
+          "board": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Board"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "chapter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter"
+          },
+          "class_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "class_composition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassComposition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "teacher_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Id"
+          },
+          "lesson_plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Plan"
+          },
+          "objectives": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objectives"
+          },
+          "retranscribe": {
+            "type": "boolean",
+            "title": "Retranscribe",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MetadataPatch",
+        "description": "Fields of ``LectureMetadataInput`` to change (omitted = unchanged); the merged result is\nvalidated like creation."
       },
       "MetadataSuggestionOut": {
         "properties": {
@@ -2771,6 +3101,114 @@
           "url"
         ],
         "title": "PartUrl"
+      },
+      "Participant": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_name"
+        ],
+        "title": "Participant"
+      },
+      "Participants": {
+        "properties": {
+          "teacher": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Participant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "students": {
+            "items": {
+              "$ref": "#/components/schemas/Participant"
+            },
+            "type": "array",
+            "title": "Students",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "Participants"
+      },
+      "ParticipantsParseIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "title": "Text"
+          },
+          "teacher_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ParticipantsParseIn"
+      },
+      "ParticipantsParseOut": {
+        "properties": {
+          "participants": {
+            "$ref": "#/components/schemas/Participants"
+          },
+          "teacher_found": {
+            "type": "boolean",
+            "title": "Teacher Found"
+          },
+          "source_format": {
+            "type": "string",
+            "title": "Source Format"
+          },
+          "rows_read": {
+            "type": "integer",
+            "title": "Rows Read"
+          },
+          "dropped": {
+            "type": "integer",
+            "title": "Dropped"
+          },
+          "duplicates": {
+            "type": "integer",
+            "title": "Duplicates"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "participants",
+          "teacher_found",
+          "source_format",
+          "rows_read",
+          "dropped",
+          "duplicates",
+          "warnings"
+        ],
+        "title": "ParticipantsParseOut"
       },
       "PartsIn": {
         "properties": {
@@ -3458,11 +3896,23 @@
         ],
         "title": "UploadIn"
       },
+      "UploadKind": {
+        "type": "string",
+        "enum": [
+          "media",
+          "chat"
+        ],
+        "title": "UploadKind"
+      },
       "UploadOut": {
         "properties": {
           "upload_id": {
             "type": "string",
             "title": "Upload Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/UploadKind",
+            "default": "media"
           },
           "mode": {
             "type": "string",
@@ -3846,24 +4296,6 @@
         ],
         "title": "Word"
       },
-      "ClassComposition": {
-        "enum": [
-          "co_ed",
-          "girls",
-          "boys",
-          "unknown"
-        ],
-        "title": "ClassComposition",
-        "type": "string"
-      },
-      "ClassType": {
-        "enum": [
-          "online",
-          "in_person"
-        ],
-        "title": "ClassType",
-        "type": "string"
-      },
       "LectureCreateJSON": {
         "properties": {
           "upload_id": {
@@ -3887,6 +4319,31 @@
             ],
             "default": null,
             "title": "Teacher User Id"
+          },
+          "participants": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Participants"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "chat_upload_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Chat Upload Id"
           }
         },
         "required": [

@@ -33,6 +33,7 @@ function fakeApi(partSize: number, calls: { signed: number[][]; completed: { par
       const n = Math.ceil(b.size_bytes / partSize);
       return Promise.resolve({
         upload_id: "up_1",
+        kind: "media",
         mode: "multipart",
         expires_in: 3600,
         url: null,

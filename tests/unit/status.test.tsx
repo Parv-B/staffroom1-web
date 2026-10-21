@@ -9,6 +9,7 @@ function detail(over: Partial<LectureDetail>): LectureDetail {
   return {
     lecture_id: "lec_1",
     org_id: "o",
+    has_chat: false,
     teacher_user_id: "t",
     status: "running",
     metadata: { chapter: "C" },

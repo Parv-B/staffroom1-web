@@ -44,7 +44,7 @@ function LectureLayout() {
         <h1 className="t-display measure">{lectureTitle(d.metadata)}</h1>
         <p className="t-reading measure mt-2 text-slate">
           {teacherName ? `${teacherName}. ` : ""}
-          {lectureFacts(d.metadata, d.duration_ms)}. Uploaded {longDate(d.created_at)}.
+          {lectureFacts(d.metadata, d.duration_ms)}. Uploaded {longDate(d.created_at)}.{inputsFact(d)}
           {done ? null : ` ${STATUS_LABEL[d.status]}.`}
         </p>
         <Sharing detail={d} role={me.role} isOwnLecture={d.teacher_user_id === me.user_id} />
@@ -62,6 +62,14 @@ function LectureLayout() {
   ) : (
     body
   );
+}
+
+/** What was given for removing names. The names themselves never come back from the API. */
+function inputsFact(d: LectureDetail): string {
+  const list = d.participant_count == null ? null : `a participant list with ${d.participant_count.toString()} ${d.participant_count === 1 ? "student" : "students"}`;
+  const chat = d.has_chat ? "the meeting's chat" : null;
+  const both = [list, chat].filter(Boolean).join(" and ");
+  return both ? ` Uploaded with ${both}.` : "";
 }
 
 function BackLink() {

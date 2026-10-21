@@ -77,5 +77,30 @@ Decisions made on your behalf:
 - Owners and admins pick a teacher (also linked from each teacher in the centre summary). They
   see the values they can already see in the lecture list, whatever the sharing.
 
+## Upload: participant list and chat log (backend changelog item 2)
+
+| Screen | Role | Screenshot |
+|---|---|---|
+| Teacher's row not recognised: asks them to pick it | teacher | ![](../screenshots/upload-participants-teacher-unknown.png) |
+| Whole form with a list and the teacher chosen | teacher | ![](../screenshots/upload-teacher.png) |
+| Same, tablet portrait | teacher | ![](../screenshots/upload-teacher-portrait.png) |
+| Admin (teacher picker) | admin | ![](../screenshots/upload-admin.png) |
+
+All names in these screenshots are invented.
+
+Decisions made on your behalf:
+- Both inputs sit in an optional "Participant list and chat (optional)" part of the form,
+  below the lesson details, with the brief's explanation that names are used only for removing
+  them from the transcript.
+- The pasted text is read by `POST /participants/parse` and shown as an editable list (rename,
+  remove, add, pick the teacher with a radio). When the teacher's row isn't recognised, the
+  lecture can't be created until the teacher picks their row or confirms they aren't on the
+  list. The API's warnings are shown as given.
+- The list lives only in the page's memory: unlike the other details, it isn't saved with the
+  upload draft in the browser, so a refresh loses it (names of minors stay out of browser
+  storage). The chat file is uploaded as soon as it's chosen.
+- The lecture page says "Uploaded with a participant list with N students and the meeting's
+  chat" when they were given; names never come back.
+
 ## Needs your decision
 - None yet for the notes.

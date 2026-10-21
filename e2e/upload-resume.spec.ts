@@ -50,7 +50,7 @@ test("a multipart upload resumes after a refresh, re-signing only the missing pa
   });
   await page.goto("/lectures/new");
   const created = page.waitForResponse((r) => r.url().endsWith("/api/uploads") && r.request().method() === "POST");
-  await page.locator("input[type=file]").setInputFiles(filePath);
+  await page.locator("input[type=file]").first().setInputFiles(filePath);
   const body = (await (await created).json()) as { upload_id: string; mode: string; part_count: number };
   uploadId = body.upload_id;
   expect(body.mode).toBe("multipart");
@@ -70,7 +70,7 @@ test("a multipart upload resumes after a refresh, re-signing only the missing pa
     await route.abort();
   });
   const resigned = page.waitForRequest((r) => /\/api\/uploads\/[^/]+\/parts$/.test(r.url()));
-  await page.locator("input[type=file]").setInputFiles(filePath);
+  await page.locator("input[type=file]").first().setInputFiles(filePath);
   await expect(page.getByText("Continuing the earlier upload of this file.")).toBeVisible();
   expect((await resigned).postDataJSON()).toEqual({ part_numbers: [2] });
 

@@ -6,6 +6,7 @@ function lecture(id: string, created: string, metrics: LectureSummary["metrics_s
   return {
     lecture_id: id,
     org_id: "o",
+    has_chat: false,
     teacher_user_id: "t",
     analysis_available: status === "done",
     total_cost_usd: 0,

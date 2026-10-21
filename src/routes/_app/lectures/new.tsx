@@ -5,6 +5,8 @@ import { Button, DropZone, type FileDropItem, FileTrigger, Form, Label, ListBox,
 import { api, isApiError, unwrap, type Schemas } from "~/api/client";
 import { can } from "~/auth/roles";
 import { EMPTY_DRAFT, MetadataForm, fieldFor, type DraftField } from "~/lectures/MetadataForm";
+import { ChatLogPanel, ParticipantsPanel, type ChatState } from "~/lectures/ParticipantsPanel";
+import { EMPTY_LIST, listProblem, toParticipants, type ParticipantList } from "~/lectures/participants";
 import { EMPTY_ASSIST, applySuggestion, fetchSuggestion, keepField, noteEdits, objectivesToSubmit, type FormAssist } from "~/lectures/suggest";
 import type { MetadataDraft, UploadRecord } from "~/upload/store";
 import { missingParts } from "~/upload/uploader";
@@ -65,6 +67,10 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
   const [errors, setErrors] = useState<Partial<Record<DraftField, string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Kept in memory only: names of minors never go to browser storage.
+  const [participants, setParticipants] = useState<ParticipantList>(EMPTY_LIST);
+  const [participantsError, setParticipantsError] = useState<string | null>(null);
+  const [chat, setChat] = useState<ChatState>({ kind: "none" });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const teachers = useQuery({ ...usersQuery, enabled: isAdmin, select: (u: Schemas["UserOut"][]) => u.filter((x) => x.role === "teacher" && x.active) });
@@ -135,6 +141,16 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
     if (isAdmin && !draft.teacher_user_id) missing.teacher_user_id = "Choose whose lecture this is.";
     setErrors(missing);
     if (Object.keys(missing).length > 0) return;
+    const listIssue = listProblem(participants);
+    if (listIssue) {
+      setFormError(`The participant list needs a change: ${listIssue}`);
+      return;
+    }
+    if (chat.kind === "uploading") {
+      setFormError("The chat file is still uploading. Create the lecture when it has finished.");
+      return;
+    }
+    setParticipantsError(null);
 
     const rec = up.state.record;
     setSubmitting(true);
@@ -155,6 +171,8 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
               lesson_plan: draft.lesson_plan.trim() || null,
               objectives: objectivesToSubmit(draft, assist),
             },
+            participants: toParticipants(participants),
+            chat_upload_id: chat.kind === "ready" ? chat.uploadId : null,
           },
         }),
       );
@@ -171,6 +189,12 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
         }
         setErrors(byField);
         setFormError("Some details weren't accepted. They're marked above.");
+      } else if (isApiError(err, "invalid_participants")) {
+        setParticipantsError("The participant list wasn't accepted: a name is empty or too long, or there are more than 1000 students. Check the list.");
+        setFormError("The lecture wasn't created. The participant list needs a change.");
+      } else if (isApiError(err, "wrong_upload_kind") || (isApiError(err, "upload_used") && chat.kind === "ready" && /chat/i.test(err.message))) {
+        setChat({ kind: "error", message: "This chat file can't be used for this lecture. Choose the chat file again." });
+        setFormError("The lecture wasn't created. Choose the chat file again, or leave it out.");
       } else if (isApiError(err, "upload_used")) {
         await up.forget(rec);
         setFormError("This recording already belongs to a lecture. Check the lecture list before uploading it again.");
@@ -258,6 +282,23 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
                 ) : null
               }
             />
+            <fieldset className="mt-10 space-y-8 border-0 border-t border-slate/30 p-0 pt-6">
+              <legend className="t-subheading float-left mb-1 w-full p-0">Participant list and chat (optional)</legend>
+              <p className="t-small measure clear-both m-0 text-slate">
+                Both help Staffroom1 remove students' names from the transcript. Without them, names are found from a general list of names, which can miss some.
+              </p>
+              <ParticipantsPanel
+                list={participants}
+                onChange={(l) => {
+                  setParticipants(l);
+                  setParticipantsError(null);
+                }}
+                teacherName={isAdmin ? ((teachers.data ?? []).find((t) => t.id === draft.teacher_user_id)?.display_name ?? null) : null}
+                isAdmin={isAdmin}
+                serverError={participantsError}
+              />
+              <ChatLogPanel chat={chat} onChange={setChat} />
+            </fieldset>
             <div className="mt-8 space-y-3" aria-live="polite">
               {formError ? (
                 <p className="t-small border-l-[3px] border-ink pl-3" role="alert">

@@ -13,7 +13,7 @@ test("upload, create and process a lecture end to end", async ({ page }) => {
   expect(existsSync(recording)).toBe(true);
   await signIn(page, "teacher");
   await page.goto("/lectures/new");
-  await page.locator("input[type=file]").setInputFiles(recording);
+  await page.locator("input[type=file]").first().setInputFiles(recording);
   await page.getByLabel("Board").fill("CBSE");
   await page.getByLabel("Subject").fill("Mathematics");
   await page.getByRole("radio", { name: "Grade 10" }).check({ force: true });

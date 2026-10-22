@@ -25,13 +25,17 @@ test.beforeAll(() => {
 
 test.afterAll(async ({ request }) => {
   if (uploadId && token) {
-    const res = await request.post(`${API}/uploads/${uploadId}/abort`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await request.post(`${API}/uploads/${uploadId}/abort`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     expect([200, 409]).toContain(res.status()); // 409: already aborted or completed
   }
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("a multipart upload resumes after a refresh, re-signing only the missing part", async ({ page }) => {
+test("a multipart upload resumes after a refresh, re-signing only the missing part", async ({
+  page,
+}) => {
   test.setTimeout(180_000);
   page.on("dialog", (d) => void d.accept()); // the "leave while uploading?" prompt on reload
   await signIn(page, "teacher");
@@ -40,42 +44,69 @@ test("a multipart upload resumes after a refresh, re-signing only the missing pa
     return raw ? (JSON.parse(raw) as { token: string }).token : null;
   });
 
-  // First attempt: part 2 never completes (the connection to S3 hangs).
-  await page.route("http://127.0.0.1:8333/**", async (route) => {
-    if (route.request().method() === "PUT" && /[?&]partNumber=2(&|$)/.test(route.request().url())) {
-      await new Promise(() => undefined);
-      return;
-    }
-    await route.continue();
-  });
+  // First attempt: part 2 never completes (the connection to S3 hangs). Matched by query
+  // string, not host: signed URLs point at whatever public S3 endpoint the API is set up with
+  // (a fixed localhost pattern stopped matching once the site went public, and the test then
+  // passed only when part 2 happened to be the slowest part).
+  await page.route(
+    (url) => /[?&]partNumber=2(&|$)/.test(url.search),
+    async (route) => {
+      if (route.request().method() === "PUT") {
+        await new Promise(() => undefined);
+        return;
+      }
+      await route.continue();
+    },
+  );
   await page.goto("/lectures/new");
-  const created = page.waitForResponse((r) => r.url().endsWith("/api/uploads") && r.request().method() === "POST");
+  const created = page.waitForResponse(
+    (r) => r.url().endsWith("/api/uploads") && r.request().method() === "POST",
+  );
   await page.locator("input[type=file]").first().setInputFiles(filePath);
-  const body = (await (await created).json()) as { upload_id: string; mode: string; part_count: number };
+  const body = (await (await created).json()) as {
+    upload_id: string;
+    mode: string;
+    part_count: number;
+  };
   uploadId = body.upload_id;
   expect(body.mode).toBe("multipart");
   expect(body.part_count).toBe(3);
-  await expect(page.getByText(/2 of 3 parts stored/)).toBeVisible({ timeout: 90_000 });
+  await expect(page.getByText(/2 of 3 parts stored/)).toBeVisible({
+    timeout: 90_000,
+  });
 
   // Refresh mid-upload, with S3 behaving normally again.
   await page.unrouteAll({ behavior: "ignoreErrors" });
   await page.reload();
-  await expect(page.getByText("Unfinished uploads on this device")).toBeVisible();
-  await expect(page.getByText(/2 of 3 parts stored\. Choose the same file below/)).toBeVisible();
+  await expect(
+    page.getByText("Unfinished uploads on this device"),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/2 of 3 parts stored\. Choose the same file below/),
+  ).toBeVisible();
 
   // Second attempt: the same file. Block the final /complete so nothing is created.
-  let completeBody: { parts: { part_number: number; etag: string }[] } | null = null;
+  let completeBody: { parts: { part_number: number; etag: string }[] } | null =
+    null;
   await page.route("**/api/uploads/*/complete", async (route) => {
     completeBody = route.request().postDataJSON() as typeof completeBody;
     await route.abort();
   });
-  const resigned = page.waitForRequest((r) => /\/api\/uploads\/[^/]+\/parts$/.test(r.url()));
+  const resigned = page.waitForRequest((r) =>
+    /\/api\/uploads\/[^/]+\/parts$/.test(r.url()),
+  );
   await page.locator("input[type=file]").first().setInputFiles(filePath);
-  await expect(page.getByText("Continuing the earlier upload of this file.")).toBeVisible();
+  await expect(
+    page.getByText("Continuing the earlier upload of this file."),
+  ).toBeVisible();
   expect((await resigned).postDataJSON()).toEqual({ part_numbers: [2] });
 
   await expect.poll(() => completeBody, { timeout: 90_000 }).not.toBeNull();
-  const parts = (completeBody as unknown as { parts: { part_number: number; etag: string }[] }).parts;
+  const parts = (
+    completeBody as unknown as {
+      parts: { part_number: number; etag: string }[];
+    }
+  ).parts;
   expect(parts.map((p) => p.part_number)).toEqual([1, 2, 3]);
   for (const p of parts) expect(p.etag).toMatch(/^"[0-9a-f-]+"$/);
 });

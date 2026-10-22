@@ -40,7 +40,24 @@ function group(n: number, opts: { nullWait?: number; lowWait?: number; scale?: n
   };
 }
 
-export function syntheticSummary() {
+export function syntheticSummary(groupBy: "teacher" | "subject" | "grade" = "teacher") {
+  const groups =
+    groupBy === "subject"
+      ? [
+          { key: "biology", label: "Biology", ...group(3, { scale: 0.95 }) },
+          { key: "chemistry", label: "Chemistry", ...group(2, { lowWait: 1 }) },
+          { key: "mathematics", label: "Mathematics", ...group(6, { nullWait: 2, scale: 1.05 }) },
+          { key: "physics", label: "Physics", ...group(1, { scale: 1.1 }) },
+          { key: null, label: "Not recorded", ...group(1) },
+        ]
+      : groupBy === "grade"
+        ? [
+            { key: "7", label: "7", ...group(1) },
+            { key: "9", label: "9", ...group(3, { lowWait: 1 }) },
+            { key: "10", label: "10", ...group(7, { nullWait: 3, scale: 1.05 }) },
+            { key: "11", label: "11", ...group(2, { scale: 0.9 }) },
+          ]
+        : [];
   const teachers = [
     { teacher_user_id: "t1", display_name: "Aisha Kapoor", active: true, ...group(6, { lowWait: 2, scale: 1.05 }) },
     { teacher_user_id: "t2", display_name: "Daniel Mathew", active: true, ...group(4, { nullWait: 1, scale: 0.9, strength: 7 }) },
@@ -57,6 +74,9 @@ export function syntheticSummary() {
     metric_names: METRICS,
     org: group(13, { nullWait: 3, lowWait: 2 }),
     teachers,
+    group_by: groupBy,
+    metadata_filters: [],
+    groups,
   };
 }
 
@@ -99,4 +119,29 @@ export function syntheticLectures(teacherUserId: string) {
     };
   });
   return { items, total: items.length, limit: 100, offset: 0 };
+}
+
+// Synthetic GET /org/trend: twelve weeks with an empty week, a week of lectures with no value
+// for wait time, weeks resting on one or two lectures and low-confidence values. Invented.
+export function syntheticTrend(bucket: "week" | "month" = "week") {
+  const counts = bucket === "week" ? [3, 4, 0, 2, 5, 1, 3, 0, 4, 6, 2, 3] : [7, 14, 11, 9];
+  const day = (d: Date) => d.toISOString().slice(0, 10);
+  const buckets = counts.map((n, i) => {
+    const start = bucket === "week" ? new Date(Date.UTC(2026, 6, 27 + 7 * i)) : new Date(Date.UTC(2026, 6 + i, 1));
+    const end = bucket === "week" ? new Date(start.getTime() + 6 * 86_400_000) : new Date(Date.UTC(2026, 7 + i, 0));
+    const wobble = 0.9 + ((i * 37) % 23) / 100;
+    const g = group(n, { scale: wobble, nullWait: i === 5 ? 1 : 0, lowWait: i % 4 === 1 ? 1 : 0 });
+    return { start: day(start), end: day(end), partial: i === counts.length - 1, n_lectures: n, n_done: n, n_done_without_metrics: 0, metrics: g.metrics };
+  });
+  return {
+    org_id: "synthetic",
+    bucket,
+    date_basis: "created_at",
+    from_date: buckets[0]?.start ?? null,
+    to_date: buckets[buckets.length - 1]?.end ?? null,
+    teacher_user_id: null,
+    metadata_filters: [],
+    metric_names: METRICS,
+    buckets,
+  };
 }

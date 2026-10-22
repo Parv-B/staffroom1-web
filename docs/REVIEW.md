@@ -75,7 +75,7 @@ Decisions made on your behalf:
   order with the whole centre as the first row. Measures show one metric at a time (a pill
   picker, kept in the URL) so each teacher stays one row: lectures with a value, median, middle
   half (p25 to p75), low-confidence count, missing count with the most common reason. No
-  charts, no range bars, no colour that depends on a value. A group with no values reads
+  range bars in the tables (charts over time were added later, see below), no colour that depends on a value. A group with no values reads
   "N/A" and why. Categories never checked read "Not checked in any lecture yet", never 0.
 - An optional upload-date period (from/to) is offered; a reversed period shows the API's
   `bad_range` as a plain sentence.
@@ -169,6 +169,39 @@ Decisions made on your behalf:
   agreement percentage is shown at all, so there's no share without its `n`. No date filter yet.
 - **New results** is a quiet ink mark with a dot (not a colour that reads good or bad), with
   "Mark as seen" beside it. Opening the analysis clears it in the cached list too.
+
+## Centre: measures over time and group by subject/grade (backend changelog item 7)
+
+| Screen | Role | Screenshot |
+|---|---|---|
+| Centre, real E2E data (teacher grouping, week by week) | owner | ![](../screenshots/centre-owner.png) |
+| Centre, real data grouped by subject, month by month | owner | ![](../screenshots/centre-owner-by-subject.png) |
+| Centre, real data grouped by grade | owner | ![](../screenshots/centre-owner-by-grade.png) |
+| **Synthetic** 12 weeks (mocked `/org/trend`): gaps, N/A, n=1/n=2, low confidence, tooltip | owner | ![](../screenshots/centre-over-time-synthetic-tooltip.png) |
+| Same, tablet portrait, grouped by subject | owner | ![](../screenshots/centre-over-time-synthetic-portrait.png) |
+
+Decisions made on your behalf:
+- **One chart per measure** (8 small multiples, two columns on wide screens, one on tablet
+  portrait), the same conventions as the teacher's progress charts: axis from zero, one
+  colour, no targets, no fitted line. The line joins **bucket medians**; the shaded band is the
+  middle half (p25 to p75). Weeks start on Monday; dates are upload dates (UTC), because
+  lectures have no separate "taught on" date.
+- **Gaps are never zero:** a week with no lectures is an empty gap (dotted guide, "No
+  lectures" when focused); a week with lectures but no value is the hatched N/A band with the
+  reason. The line breaks at both.
+- **Few lectures:** a point resting on one or two values carries "n=1"/"n=2" above it and a
+  muted (grey) marker; its tooltip says "Rests on only 2 lectures". The figure caption counts
+  them. **Low confidence:** the marker is hollow if any value in the week is low confidence,
+  with "Low confidence: k of n" in the tooltip and the table.
+- **Exact values** table under the charts: one row per week/month, every measure's median,
+  middle half and n (n bold when it is 1 or 2). The per-group Measures table stays below that.
+- **Group the tables by teacher / subject / grade** (pills, kept in the URL as `group=`):
+  switches the Lectures, Findings and Measures tables. Order is the API's: teachers and
+  subjects alphabetical, grades numeric, "Not recorded" last. Subjects are merged whatever the
+  spelling ("Maths" = "Mathematics"), and the page says so.
+- **Subject, grade and teacher filters** (dropdowns, in the URL) narrow both the tables and the
+  charts; the choices list every subject/grade/teacher in the chosen period. The week/month
+  toggle applies to the charts only.
 
 ## Owner's decisions (2026-10-22)
 1. **Categories a lecture was never checked for** now read **"Not checked for this lesson"**

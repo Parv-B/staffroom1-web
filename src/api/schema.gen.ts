@@ -147,7 +147,12 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete User
+         * @description Hard-delete a user who has no data (no lectures, uploads, feedback or notes edits);
+         *     anyone else is deactivated instead (``409 user_has_data``).
+         */
+        delete: operations["delete_user_users__user_id__delete"];
         options?: never;
         head?: never;
         /** Update User */
@@ -545,6 +550,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/org/trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Org Trend
+         * @description Per week or month (by lecture ``created_at``, UTC): each deterministic metric's
+         *     distribution over that bucket's done lectures. Empty buckets are present with n=0.
+         */
+        get: operations["org_trend_org_trend_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/org/feedback-summary": {
         parameters: {
             query?: never;
@@ -890,6 +916,47 @@ export interface components {
             /** Job Queued */
             job_queued: boolean;
         };
+        /** MetadataFilter */
+        MetadataFilter: {
+            /**
+             * Field
+             * @enum {string}
+             */
+            field: "subject" | "grade";
+            /** Value */
+            value: string;
+        };
+        /** MetadataGroup */
+        MetadataGroup: {
+            /** N Lectures */
+            n_lectures: number;
+            /** Lectures By Status */
+            lectures_by_status: {
+                [key: string]: number;
+            };
+            /** N Done Without Metrics */
+            n_done_without_metrics: number;
+            /** Findings */
+            findings: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            /** Findings N Lectures */
+            findings_n_lectures: {
+                [key: string]: number;
+            };
+            /** N Done Categories Unknown */
+            n_done_categories_unknown: number;
+            /** Metrics */
+            metrics: {
+                [key: string]: components["schemas"]["MetricAggregate"];
+            };
+            /** Key */
+            key: string | null;
+            /** Label */
+            label: string;
+        };
         /**
          * MetadataPatch
          * @description Fields of ``LectureMetadataInput`` to change (omitted = unchanged); the merged result is
@@ -1079,6 +1146,42 @@ export interface components {
             org: components["schemas"]["GroupSummary"];
             /** Teachers */
             teachers: components["schemas"]["TeacherGroup"][];
+            /**
+             * Group By
+             * @enum {string}
+             */
+            group_by: "teacher" | "subject" | "grade";
+            /** Metadata Filters */
+            metadata_filters: components["schemas"]["MetadataFilter"][];
+            /** Groups */
+            groups: components["schemas"]["MetadataGroup"][];
+        };
+        /** OrgTrendOut */
+        OrgTrendOut: {
+            /** Org Id */
+            org_id: string;
+            /**
+             * Bucket
+             * @enum {string}
+             */
+            bucket: "week" | "month";
+            /**
+             * Date Basis
+             * @constant
+             */
+            date_basis: "created_at";
+            /** From Date */
+            from_date: string | null;
+            /** To Date */
+            to_date: string | null;
+            /** Teacher User Id */
+            teacher_user_id: string | null;
+            /** Metadata Filters */
+            metadata_filters: components["schemas"]["MetadataFilter"][];
+            /** Metric Names */
+            metric_names: string[];
+            /** Buckets */
+            buckets: components["schemas"]["TrendBucket"][];
         };
         /** PartUrl */
         PartUrl: {
@@ -1373,6 +1476,31 @@ export interface components {
             /** Redacted */
             redacted: boolean;
             transcript: components["schemas"]["Transcript"];
+        };
+        /** TrendBucket */
+        TrendBucket: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Partial */
+            partial: boolean;
+            /** N Lectures */
+            n_lectures: number;
+            /** N Done */
+            n_done: number;
+            /** N Done Without Metrics */
+            n_done_without_metrics: number;
+            /** Metrics */
+            metrics: {
+                [key: string]: components["schemas"]["MetricAggregate"];
+            };
         };
         /** UploadIn */
         UploadIn: {
@@ -1837,6 +1965,35 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_users__user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -2644,6 +2801,9 @@ export interface operations {
                 from?: string | null;
                 to?: string | null;
                 teacher_user_id?: string | null;
+                subject?: string | null;
+                grade?: string | null;
+                group_by?: "teacher" | "subject" | "grade";
             };
             header?: never;
             path?: never;
@@ -2658,6 +2818,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_trend_org_trend_get: {
+        parameters: {
+            query?: {
+                bucket?: "week" | "month";
+                from?: string | null;
+                to?: string | null;
+                teacher_user_id?: string | null;
+                subject?: string | null;
+                grade?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgTrendOut"];
                 };
             };
             /** @description Validation Error */

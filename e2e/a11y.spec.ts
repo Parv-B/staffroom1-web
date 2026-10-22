@@ -8,8 +8,8 @@ const L = `/lectures/${LECTURE_ID}`;
 const TEACHER_ID = "a3142824-4e16-484c-a420-371d4eaa5329";
 const SCREENS: Record<E2ERole, string[]> = {
   teacher: ["/lectures", "/lectures/new", "/progress", "/account/password", `${L}/analysis/overview`, `${L}/analysis/findings`, `${L}/analysis/structure`, `${L}/analysis/coverage`, `${L}/analysis/metrics`, `${L}/transcript`, `${L}/notes`, `${L}/status`, `${L}/edit`],
-  owner: ["/lectures", "/centre", `/progress?teacher=${TEACHER_ID}`, `${L}/analysis/overview`, `${L}/notes`, `${L}/status`],
-  admin: ["/lectures", "/lectures/new", "/centre", "/admin/users", "/admin/feedback", `${L}/analysis/findings`, `${L}/transcript`],
+  owner: ["/lectures", "/centre", "/centre?group=subject&bucket=month", `/progress?teacher=${TEACHER_ID}`, `${L}/analysis/overview`, `${L}/notes`, `${L}/status`],
+  admin: ["/lectures", "/lectures/new", "/centre", "/centre?group=grade", "/admin/users", "/admin/feedback", `${L}/analysis/findings`, `${L}/transcript`],
 };
 
 async function audit(page: Page, where: string): Promise<string[]> {

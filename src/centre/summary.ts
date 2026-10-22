@@ -75,3 +75,62 @@ export function parseRange(s: Record<string, unknown>): SummaryRange {
     ...(typeof s.to === "string" && ISO_DATE.test(s.to) ? { to: s.to } : {}),
   };
 }
+
+export type GroupBy = OrgSummary["group_by"];
+export type MetadataGroup = Schemas["MetadataGroup"];
+export type Bucket = "week" | "month";
+
+/** What narrows the centre's lectures (besides the dates): passed straight to the API, which
+ *  normalises subject and grade spellings. */
+export interface CentreFilters {
+  subject?: string;
+  grade?: string;
+  teacher?: string;
+}
+
+const GROUP_BYS: readonly GroupBy[] = ["teacher", "subject", "grade"];
+const SAFE = /^[\p{L}\p{N} .&'()_-]{1,100}$/u;
+
+export function parseGroupBy(v: unknown): GroupBy {
+  return GROUP_BYS.find((g) => g === v) ?? "teacher";
+}
+
+export function parseBucket(v: unknown): Bucket {
+  return v === "month" ? "month" : "week";
+}
+
+export function parseFilters(s: Record<string, unknown>): CentreFilters {
+  const pick = (v: unknown) => (typeof v === "string" && SAFE.test(v) ? v : undefined);
+  const subject = pick(s.subject);
+  const grade = pick(s.grade);
+  const teacher = typeof s.teacher === "string" && /^[A-Za-z0-9_-]{1,36}$/.test(s.teacher) ? s.teacher : undefined;
+  return { ...(subject ? { subject } : {}), ...(grade ? { grade } : {}), ...(teacher ? { teacher } : {}) };
+}
+
+/** A row of the switched tables: the whole centre first, then the API's groups in the API's
+ *  order (alphabetical teachers or subjects, numeric grades). Never re-sorted here. */
+export type SummaryRow =
+  | { kind: "org"; key: string; label: string; g: GroupSummary }
+  | { kind: "teacher"; key: string; label: string; g: GroupSummary; teacherId: string; active: boolean }
+  | { kind: "subject" | "grade"; key: string; label: string; g: GroupSummary; value: string | null };
+
+export function summaryRows(s: OrgSummary): SummaryRow[] {
+  const org: SummaryRow = { kind: "org", key: "org", label: "Whole centre", g: s.org };
+  if (s.group_by !== "subject" && s.group_by !== "grade") {
+    return [org, ...s.teachers.map((t): SummaryRow => ({ kind: "teacher", key: t.teacher_user_id, label: t.display_name ?? "Unnamed teacher", g: t, teacherId: t.teacher_user_id, active: t.active }))];
+  }
+  const kind = s.group_by;
+  return [
+    org,
+    ...s.groups.map((g): SummaryRow => ({ kind, key: `${kind}:${g.key ?? "none"}`, label: kind === "grade" && g.key !== null ? `Grade ${g.label}` : g.label, g, value: g.key })),
+  ];
+}
+
+/** The first column's heading and the tables' captions for a grouping. */
+export const GROUP_NOUN: Readonly<Record<GroupBy, string>> = { teacher: "Teacher", subject: "Subject", grade: "Grade" };
+
+/** The filters in words, e.g. "Mathematics, grade 10, one teacher". */
+export function filtersText(f: CentreFilters, teacherName: string | null): string | null {
+  const parts = [f.subject ?? null, f.grade ? `grade ${f.grade}` : null, f.teacher ? (teacherName ?? "one teacher") : null].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : null;
+}

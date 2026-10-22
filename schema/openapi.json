@@ -58,6 +58,9 @@
               }
             }
           },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -67,9 +70,6 @@
                 }
               }
             }
-          },
-          "429": {
-            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -141,6 +141,9 @@
               }
             }
           },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -150,9 +153,6 @@
                 }
               }
             }
-          },
-          "429": {
-            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -185,6 +185,9 @@
               }
             }
           },
+          "429": {
+            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -194,9 +197,6 @@
                 }
               }
             }
-          },
-          "429": {
-            "description": "too many sign-in attempts from this client IP; see `Retry-After`"
           }
         }
       }
@@ -363,6 +363,45 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Delete User",
+        "description": "Hard-delete a user who has no data (no lectures, uploads, feedback or notes edits);\nanyone else is deactivated instead (``409 user_has_data``).",
+        "operationId": "delete_user_users__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -1704,6 +1743,55 @@
               ],
               "title": "Teacher User Id"
             }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grade"
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "teacher",
+                "subject",
+                "grade"
+              ],
+              "type": "string",
+              "default": "teacher",
+              "title": "Group By"
+            }
           }
         ],
         "responses": {
@@ -1713,6 +1801,144 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OrgSummaryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/org/trend": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "summary": "Org Trend",
+        "description": "Per week or month (by lecture ``created_at``, UTC): each deterministic metric's\ndistribution over that bucket's done lectures. Empty buckets are present with n=0.",
+        "operationId": "org_trend_org_trend_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "week",
+                "month"
+              ],
+              "type": "string",
+              "default": "week",
+              "title": "Bucket"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "name": "teacher_user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 36
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Teacher User Id"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grade"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgTrendOut"
                 }
               }
             }
@@ -1896,8 +2122,8 @@
         "properties": {
           "part_number": {
             "type": "integer",
-            "maximum": 10000,
-            "minimum": 1,
+            "maximum": 10000.0,
+            "minimum": 1.0,
             "title": "Part Number"
           },
           "etag": {
@@ -2681,6 +2907,103 @@
         ],
         "title": "MetadataEditOut"
       },
+      "MetadataFilter": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "subject",
+              "grade"
+            ],
+            "title": "Field"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "value"
+        ],
+        "title": "MetadataFilter"
+      },
+      "MetadataGroup": {
+        "properties": {
+          "n_lectures": {
+            "type": "integer",
+            "title": "N Lectures"
+          },
+          "lectures_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Lectures By Status"
+          },
+          "n_done_without_metrics": {
+            "type": "integer",
+            "title": "N Done Without Metrics"
+          },
+          "findings": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Findings"
+          },
+          "findings_n_lectures": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Findings N Lectures"
+          },
+          "n_done_categories_unknown": {
+            "type": "integer",
+            "title": "N Done Categories Unknown"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MetricAggregate"
+            },
+            "type": "object",
+            "title": "Metrics"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "n_lectures",
+          "lectures_by_status",
+          "n_done_without_metrics",
+          "findings",
+          "findings_n_lectures",
+          "n_done_categories_unknown",
+          "metrics",
+          "key",
+          "label"
+        ],
+        "title": "MetadataGroup"
+      },
       "MetadataPatch": {
         "properties": {
           "board": {
@@ -2865,7 +3188,7 @@
           "cost_usd": {
             "type": "number",
             "title": "Cost Usd",
-            "default": 0
+            "default": 0.0
           },
           "timings_s": {
             "additionalProperties": {
@@ -3280,6 +3603,29 @@
             },
             "type": "array",
             "title": "Teachers"
+          },
+          "group_by": {
+            "type": "string",
+            "enum": [
+              "teacher",
+              "subject",
+              "grade"
+            ],
+            "title": "Group By"
+          },
+          "metadata_filters": {
+            "items": {
+              "$ref": "#/components/schemas/MetadataFilter"
+            },
+            "type": "array",
+            "title": "Metadata Filters"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/MetadataGroup"
+            },
+            "type": "array",
+            "title": "Groups"
           }
         },
         "type": "object",
@@ -3291,9 +3637,102 @@
           "released_categories",
           "metric_names",
           "org",
-          "teachers"
+          "teachers",
+          "group_by",
+          "metadata_filters",
+          "groups"
         ],
         "title": "OrgSummaryOut"
+      },
+      "OrgTrendOut": {
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "title": "Org Id"
+          },
+          "bucket": {
+            "type": "string",
+            "enum": [
+              "week",
+              "month"
+            ],
+            "title": "Bucket"
+          },
+          "date_basis": {
+            "type": "string",
+            "const": "created_at",
+            "title": "Date Basis"
+          },
+          "from_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Date"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Date"
+          },
+          "teacher_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher User Id"
+          },
+          "metadata_filters": {
+            "items": {
+              "$ref": "#/components/schemas/MetadataFilter"
+            },
+            "type": "array",
+            "title": "Metadata Filters"
+          },
+          "metric_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Metric Names"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/TrendBucket"
+            },
+            "type": "array",
+            "title": "Buckets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "org_id",
+          "bucket",
+          "date_basis",
+          "from_date",
+          "to_date",
+          "teacher_user_id",
+          "metadata_filters",
+          "metric_names",
+          "buckets"
+        ],
+        "title": "OrgTrendOut"
       },
       "PartUrl": {
         "properties": {
@@ -3666,12 +4105,12 @@
           },
           "start_ms": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Start Ms"
           },
           "end_ms": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "End Ms"
           },
           "speaker": {
@@ -3715,8 +4154,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1,
-                "minimum": 0
+                "maximum": 1.0,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -3905,10 +4344,10 @@
           },
           "confidence": {
             "type": "number",
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
-            "default": 0
+            "default": 0.0
           },
           "reason": {
             "anyOf": [
@@ -4057,7 +4496,7 @@
         "properties": {
           "duration_ms": {
             "type": "integer",
-            "exclusiveMinimum": 0,
+            "exclusiveMinimum": 0.0,
             "title": "Duration Ms"
           },
           "asr_provider": {
@@ -4103,6 +4542,54 @@
         "title": "TranscriptOut",
         "description": "``transcript`` is a ``Transcript`` for both ``raw=false`` (the analysis' redacted\ntranscript) and ``raw=true`` (the transcript stage's unredacted one)."
       },
+      "TrendBucket": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "title": "End"
+          },
+          "partial": {
+            "type": "boolean",
+            "title": "Partial"
+          },
+          "n_lectures": {
+            "type": "integer",
+            "title": "N Lectures"
+          },
+          "n_done": {
+            "type": "integer",
+            "title": "N Done"
+          },
+          "n_done_without_metrics": {
+            "type": "integer",
+            "title": "N Done Without Metrics"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MetricAggregate"
+            },
+            "type": "object",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "partial",
+          "n_lectures",
+          "n_done",
+          "n_done_without_metrics",
+          "metrics"
+        ],
+        "title": "TrendBucket"
+      },
       "UploadIn": {
         "properties": {
           "filename": {
@@ -4119,7 +4606,7 @@
           },
           "size_bytes": {
             "type": "integer",
-            "exclusiveMinimum": 0,
+            "exclusiveMinimum": 0.0,
             "title": "Size Bytes"
           }
         },
@@ -4508,12 +4995,12 @@
         "properties": {
           "start_ms": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Start Ms"
           },
           "end_ms": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "End Ms"
           },
           "text": {
@@ -4535,8 +5022,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1,
-                "minimum": 0
+                "maximum": 1.0,
+                "minimum": 0.0
               },
               {
                 "type": "null"

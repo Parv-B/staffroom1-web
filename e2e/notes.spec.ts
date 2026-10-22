@@ -72,11 +72,11 @@ test("teacher: problems are shown beside the heading or bullet, before and after
   await page.route(`**/api${notesUrl}`, async (route) => {
     if (route.request().method() !== "PUT") return route.fallback();
     puts += 1;
-    // The API's answer when a bullet holds a detected student name: locations only.
+    // The API's answer for a rule only it checks: field locations, never the text.
     await route.fulfill({
       status: 422,
       contentType: "application/json",
-      body: JSON.stringify({ error: { code: "name_in_notes", message: "x", fields: [{ loc: ["body", "sections", 1, "bullets", 0, "text"], msg: "contains a student's name", type: "name" }] } }),
+      body: JSON.stringify({ error: { code: "invalid_notes", message: "x", fields: [{ loc: ["body", "sections", 1, "bullets", 0, "text"], msg: "bullet text is empty", type: "empty_text" }] } }),
     });
   });
   const heading = page.getByRole("textbox", { name: "Section 1 heading" });
@@ -89,10 +89,10 @@ test("teacher: problems are shown beside the heading or bullet, before and after
 
   await heading.fill("Surface area of combined solids");
   await page.getByRole("button", { name: "Save notes" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "detected as a student's name" })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "The places that need a change are marked below" })).toBeVisible();
   const flagged = page.getByRole("textbox", { name: "Bullet 1 of section 2", exact: true });
   await expect(flagged).toHaveAttribute("aria-invalid", "true");
-  await expect(page.locator('[data-bullet-key]').filter({ has: flagged }).getByText(/detected as a student's name/)).toBeVisible();
+  await expect(page.locator('[data-bullet-key]').filter({ has: flagged }).getByText(/Write something for this bullet/)).toBeVisible();
   expect(puts).toBe(1);
 
   // Editing that bullet clears the API's mark on it.
@@ -119,7 +119,7 @@ test("admin: reads the notes and downloads them, with no editing", async ({ page
   await expect(page.getByRole("button", { name: "Download as Markdown" })).toBeVisible();
 });
 
-test("owner: reads the shared notes read-only", async ({ page }) => {
+test("owner: reads the notes read-only", async ({ page }) => {
   await signIn(page, "owner");
   await page.goto(notesUrl);
   await expect(page.getByRole("article", { name: "Lecture notes" })).toBeVisible();

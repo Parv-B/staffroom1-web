@@ -21,8 +21,8 @@ interface Props {
   onDone: () => void;
 }
 
-/** The redacted transcript beside the editor: tick the lines a bullet is based on. The text is
- *  shown exactly as the API gives it ([student] stays [student]). */
+/** The transcript beside the editor: tick the lines a bullet is based on. The text is shown
+ *  exactly as the API gives it. */
 export function CitationPanel({ segments, active, onToggle, onDone }: Props) {
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.trim().toLowerCase());

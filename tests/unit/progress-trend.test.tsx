@@ -19,7 +19,6 @@ function lecture(id: string, day: number, brief: Brief | null, status: LectureSu
     total_seconds: 0,
     status,
     metadata: { board: "CBSE", grade: "10", subject: "Mathematics", chapter: `Chapter ${id}`, class_type: "online" },
-    shared_with_owner: false,
     findings_summary: {},
     metrics_summary: brief ? { wait_time_median_s: brief } : {},
     created_at: created,

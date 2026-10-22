@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { LECTURE_ID, setShared } from "../e2e/helpers";
+import { LECTURE_ID } from "../e2e/helpers";
 import { TABLET_PORTRAIT, shot, signInWithToken } from "./shot";
 
 const L = `/lectures/${LECTURE_ID}`;
@@ -47,18 +47,6 @@ for (const role of ROLES) {
     await shot(page, `status-${role}`);
   });
 }
-
-test("owner: lecture not shared", async ({ page, request }) => {
-  await signInWithToken(page, request, "owner");
-  await setShared(request, false);
-  try {
-    await page.goto(`${L}/analysis/overview`);
-    await page.getByRole("heading", { name: "The teacher hasn't shared this analysis" }).waitFor();
-    await shot(page, "analysis-not-shared-owner", { fullPage: false });
-  } finally {
-    await setShared(request, true);
-  }
-});
 
 test("account: change password", async ({ page, request }) => {
   await signInWithToken(page, request, "teacher");

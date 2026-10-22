@@ -18,7 +18,7 @@ interface Props {
 }
 
 /** Rule 12: speaker and time on every line; findings highlighted in place. Text is rendered
- *  exactly as the API gives it ([student] stays [student]). */
+ *  exactly as the API gives it. */
 export function TranscriptLines({ segments, findings, FindingLink }: Props) {
   const player = usePlayer();
   const bySegment = new Map<string, Finding>();

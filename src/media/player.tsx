@@ -53,8 +53,6 @@ function unavailableMessage(e: ApiError): string | null {
       return "The recording file can't be found in storage. The transcript and its timestamps are still here.";
     case "no_media":
       return "This lecture has no recording to play.";
-    case "not_shared":
-      return "The teacher hasn't shared this lecture, so the recording isn't available.";
     default:
       return null;
   }

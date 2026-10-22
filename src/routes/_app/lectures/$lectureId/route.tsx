@@ -1,11 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import { SwitchButton, SwitchField } from "react-aria-components";
 import { isApiError } from "~/api/client";
-import type { Role } from "~/auth/session";
 import { orgSummaryQuery } from "~/centre/queries";
-import { StatusMark } from "~/components/StatusMark";
-import { isInProgress, lectureDetailQuery, setShared, type LectureDetail } from "~/lectures/detail";
+import { isInProgress, lectureDetailQuery, type LectureDetail } from "~/lectures/detail";
 import { STATUS_LABEL, lectureFacts, lectureTitle } from "~/lectures/vocab";
 import { longDate } from "~/lib/format";
 import { PlayerProvider } from "~/media/player";
@@ -36,7 +33,7 @@ function LectureLayout() {
   const d = detail.data;
   const teacherName = me.role === "teacher" ? null : (org.data?.teachers.find((t) => t.teacher_user_id === d.teacher_user_id)?.display_name ?? null);
   const done = d.status === "done";
-  const canPlay = done && (me.role !== "owner" || d.shared_with_owner);
+  const canPlay = done;
   const body = (
     <main className="pt-6">
       <BackLink />
@@ -47,7 +44,7 @@ function LectureLayout() {
           {lectureFacts(d.metadata, d.duration_ms)}. Uploaded {longDate(d.created_at)}.{inputsFact(d)}
           {done ? null : ` ${STATUS_LABEL[d.status]}.`}
         </p>
-        <Sharing detail={d} role={me.role} isOwnLecture={d.teacher_user_id === me.user_id} />
+        {me.role === "teacher" ? <WhoCanSee /> : null}
         {(me.role === "admin" || (me.role === "teacher" && d.teacher_user_id === me.user_id)) && !isInProgress(d.status) ? (
           <p className="t-small mt-3" data-no-print>
             <Link to="/lectures/$lectureId/edit" params={{ lectureId }} className="action">
@@ -129,42 +126,11 @@ function Tabs({ lectureId, done }: { lectureId: string; done: boolean }) {
   );
 }
 
-function Sharing({ detail: d, role, isOwnLecture }: { detail: LectureDetail; role: Role; isOwnLecture: boolean }) {
-  const queryClient = useQueryClient();
-  const share = useMutation({
-    mutationFn: (shared: boolean) => setShared(d.lecture_id, shared),
-    onSuccess: (out) => {
-      queryClient.setQueryData<LectureDetail>(["lecture", d.lecture_id, "detail"], (old) => (old ? { ...old, shared_with_owner: out.shared_with_owner } : old));
-      void queryClient.invalidateQueries({ queryKey: ["lectures"] });
-    },
-  });
-  if (role === "teacher" && isOwnLecture) {
-    return (
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2" data-no-print>
-        <SwitchField isSelected={d.shared_with_owner} isDisabled={share.isPending} onChange={(v) => { share.mutate(v); }}>
-        <SwitchButton className="group t-ui flex cursor-pointer items-center gap-3">
-          <span aria-hidden="true" className="relative inline-block h-6 w-11 rounded-full border border-slate bg-sheet transition-colors group-data-[selected]:border-pen group-data-[selected]:bg-pen group-data-[focus-visible]:outline-2 group-data-[focus-visible]:outline-offset-2 group-data-[focus-visible]:outline-pen">
-            <span className="absolute top-0.5 left-0.5 size-[1.125rem] rounded-full bg-slate transition-transform group-data-[selected]:translate-x-5 group-data-[selected]:bg-sheet" />
-          </span>
-          Shared with the centre owner
-        </SwitchButton>
-        </SwitchField>
-        <span className="t-small text-slate">
-          {d.shared_with_owner
-            ? "The owner can read this analysis, its transcript and the notes. Your responses to findings stay private."
-            : "Only you (and the centre's admins) can read this analysis."}
-        </span>
-        {share.isError ? (
-          <span className="t-small" role="alert">
-            The sharing setting wasn't changed. Try again.
-          </span>
-        ) : null}
-      </div>
-    );
-  }
+/** Teachers can't hide a lecture; say plainly who reads it. */
+function WhoCanSee() {
   return (
-    <p className="mt-3">
-      {d.shared_with_owner ? <span className="t-small text-slate">Shared with the centre owner by the teacher.</span> : role === "owner" ? <StatusMark kind="not-shared" /> : <span className="t-small text-slate">Not shared with the centre owner.</span>}
+    <p className="t-small mt-3 text-slate">
+      The centre owner and admins can read this analysis, its transcript and the notes. Your responses to findings stay private.
     </p>
   );
 }

@@ -56,7 +56,7 @@ export function analysis(over: Partial<LectureAnalysis> = {}): LectureAnalysis {
     created_at: "2026-10-21T10:00:00Z",
     pipeline_version: "test",
     metadata: { board: "CBSE", grade: "10", subject: "Mathematics", chapter: "Synthetic chapter", class_type: "online", class_composition: "unknown", duration_ms: 3_600_000 },
-    quality: { asr_provider: "test", diarization_method: "test", teacher_id_method: "test", names_redacted: true, warnings: [] },
+    quality: { asr_provider: "test", diarization_method: "test", teacher_id_method: "test", names_redacted: false, warnings: [] },
     transcript: { duration_ms: 3_600_000, asr_provider: "test", segments: [segment("s0010", 61_000, "teacher", "One."), segment("s0011", 63_000, "teacher", "Two.")] },
     ...over,
   };

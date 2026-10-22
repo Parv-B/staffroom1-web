@@ -54,7 +54,7 @@ test("teacher: pastes a participant list, confirms their own row, adds a chat lo
   await page.getByLabel("Chapter").fill("Surface Areas and Volumes");
   await page.getByRole("radio", { name: "Online" }).check({ force: true });
 
-  await expect(page.getByText(/Student names on this list are removed from the transcript before any analysis/)).toBeVisible();
+  await expect(page.getByText(/Used to tell the teacher's chat messages from the students'/)).toBeVisible();
   // No host mark and no matching name: the teacher must pick their row.
   await page.getByLabel("Paste the participant list").fill("Asha Verma\nKabir Rao\nMeera Joshi\n+91 98765 43210");
   await page.getByRole("button", { name: "Read the list" }).click();

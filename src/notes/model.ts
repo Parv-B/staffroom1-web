@@ -8,7 +8,6 @@ export type NotesIn = Schemas["NotesIn"];
 
 /** Same limit as the backend (staffroom.notes.generate.MAX_IDS_PER_BULLET). */
 export const MAX_CITED = 6;
-const STUDENT_TOKEN = "[student]";
 
 export interface DraftBullet {
   readonly key: string;
@@ -76,11 +75,9 @@ const MESSAGES: Readonly<Record<string, string>> = {
   empty_heading: "Give this section a heading.",
   no_bullets: "Add at least one bullet to this section, or remove the section.",
   empty_text: "Write something for this bullet, or remove it.",
-  student_token: "Remove “[student]” and refer to students generically, for example “a student”.",
   no_evidence: "Choose at least one transcript line that supports this bullet.",
   unknown_segment: "One of the cited lines is no longer in the transcript. Choose the lines again.",
   too_many_segments: `Cite at most ${MAX_CITED.toString()} transcript lines.`,
-  name: "This contains a name that was detected as a student's name in this lecture. Refer to students generically, for example “a student”.",
   string_too_long: "This is too long to save. Shorten it or split it.",
   too_long: "There are too many items here to save. Split them up.",
   too_short: "The notes need at least one section.",
@@ -95,21 +92,19 @@ export function clean(text: string): string {
   return text.split(/\s+/).filter(Boolean).join(" ").replace(/^(?:[-*•]\s+)+/, "");
 }
 
-/** The checks the API runs on a save (docs/api.md, "Lecture notes"), except the student-name
- *  check, which only the API can do. `knownIds` is the redacted transcript's segment ids. */
+/** The checks the API runs on a save (docs/api.md, "Lecture notes"). `knownIds` is the
+ *  transcript's segment ids. */
 export function checkDraft(draft: Draft, knownIds: ReadonlySet<string>): Problem[] {
   const out: Problem[] = [];
   const add = (target: Target, type: string) => out.push({ target, type, message: problemMessage(type), from: "check" });
   if (draft.length === 0) add({ kind: "notes" }, "too_short");
   for (const s of draft) {
     if (!clean(s.heading)) add({ kind: "heading", section: s.key }, "empty_heading");
-    if (s.heading.includes(STUDENT_TOKEN)) add({ kind: "heading", section: s.key }, "student_token");
     if (s.bullets.length === 0) add({ kind: "bullets", section: s.key }, "no_bullets");
     for (const b of s.bullets) {
       const text = { kind: "text", section: s.key, bullet: b.key } as const;
       const cites = { kind: "citations", section: s.key, bullet: b.key } as const;
       if (!clean(b.text)) add(text, "empty_text");
-      if (b.text.includes(STUDENT_TOKEN)) add(text, "student_token");
       if (b.segmentIds.length === 0) add(cites, "no_evidence");
       if (b.segmentIds.some((id) => !knownIds.has(id))) add(cites, "unknown_segment");
       if (new Set(b.segmentIds).size > MAX_CITED) add(cites, "too_many_segments");

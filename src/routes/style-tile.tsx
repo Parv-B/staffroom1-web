@@ -103,9 +103,7 @@ function TileBody({ lectureId }: { lectureId: string }) {
       <p className="t-reading measure" role="alert">
         {e instanceof InvalidDocumentError
           ? "The analysis didn't match the published schema, so nothing from it is shown. Ask an admin to rerun the lecture."
-          : isApiError(e, "not_shared")
-            ? "The teacher hasn't shared this lecture."
-            : "The analysis couldn't be loaded. Reload the page to try again."}
+          : "The analysis couldn't be loaded. Reload the page to try again."}
       </p>
     );
   }
@@ -387,7 +385,6 @@ function NotesSection({ a, notes, notesError }: { a: LectureAnalysis; notes: Sch
           <StatusMark kind="draft" />
           <StatusMark kind="approved" />
           <StatusMark kind="stale" />
-          <StatusMark kind="not-shared" />
         </p>
       </div>
     </Section>

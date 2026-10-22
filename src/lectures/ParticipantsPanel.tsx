@@ -59,8 +59,8 @@ export function ParticipantsPanel({ list, onChange, teacherName, isAdmin, server
     <div className="space-y-3">
       <h3 className="t-ui m-0 font-semibold">Participant list</h3>
       <p className="t-small measure m-0">
-        Student names on this list are removed from the transcript before any analysis. They are not stored in reports or shown to anyone, and the list is
-        used for nothing else.
+        Used to tell the teacher's chat messages from the students' and to count the students. The list isn't stored in reports or shown to anyone,
+        and is used for nothing else.
       </p>
       {list.rows.length === 0 ? (
         <>
@@ -219,9 +219,8 @@ export function ChatLogPanel({ chat, onChange }: { chat: ChatState; onChange: (c
     <div className="space-y-3">
       <h3 className="t-ui m-0 font-semibold">Chat log</h3>
       <p className="t-small measure m-0">
-        The meeting's chat, as a .txt or .csv file. The names of everyone who wrote in it are removed from the transcript too. If it's the chat file from a
-        Zoom cloud recording, students' typed answers also count in the wait-time measures. A chat saved from the meeting window can't be lined up with the
-        recording, so it's used only for removing names.
+        The meeting's chat, as a .txt or .csv file. If it's the chat file from a Zoom cloud recording, students' typed answers count in the wait-time
+        measures. A chat saved from the meeting window can't be lined up with the recording, so it isn't used.
       </p>
       {chat.kind === "ready" ? (
         <p className="t-small m-0 flex flex-wrap items-center gap-x-4">

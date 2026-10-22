@@ -285,7 +285,7 @@ function Uploader({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
             <fieldset className="mt-10 space-y-8 border-0 border-t border-slate/30 p-0 pt-6">
               <legend className="t-subheading float-left mb-1 w-full p-0">Participant list and chat (optional)</legend>
               <p className="t-small measure clear-both m-0 text-slate">
-                Both help Staffroom1 remove students' names from the transcript. Without them, names are found from a general list of names, which can miss some.
+                The chat file from a Zoom cloud recording lets students' typed answers count in the wait-time measures; the participant list tells Staffroom1 which chat messages are the teacher's.
               </p>
               <ParticipantsPanel
                 list={participants}
@@ -350,9 +350,8 @@ function SuggestLine({ status, onAgain }: { status: SuggestStatus; onAgain: (() 
       <details className="mt-1">
         <summary className="action w-fit">Where suggestions come from</summary>
         <p className="measure mt-1">
-          Up to 5 minutes from the start of the class are sent to the transcription service. The transcript of that excerpt, with
-          students' names removed, goes to the AI model with the file name and your earlier lectures' details. The excerpt isn't
-          kept; only the suggestions are. Names not on the centre's name list may not be removed.
+          Up to 5 minutes from the start of the class are sent to the transcription service. The transcript of that excerpt goes to
+          the AI model with the file name and your earlier lectures' details. The excerpt isn't kept; only the suggestions are.
         </p>
       </details>
     </div>

@@ -3,7 +3,8 @@
 Screenshots are taken by `npm run screens` (playwright.screens.config.ts): pages are signed in
 with an API token placed in sessionStorage, so no password is ever typed or shown. Viewport
 1180×820 (tablet landscape) unless the name says portrait (820×1180). All data is the E2E
-centre's; the fixture lecture's student names are redacted as `[student]`.
+centre's. Screenshots taken before 2026-10-22 show student names as `[student]`; name
+redaction has since been removed.
 
 ## Every screen, per role
 
@@ -16,7 +17,6 @@ centre's; the fixture lecture's student names are redacted as `[student]`.
 | Analysis: overview | ![](../screenshots/analysis-overview-teacher.png) | ![](../screenshots/analysis-overview-owner.png) | ![](../screenshots/analysis-overview-admin.png) |
 | Analysis: findings | ![](../screenshots/analysis-findings-teacher.png) | ![](../screenshots/analysis-findings-owner.png) | ![](../screenshots/analysis-findings-admin.png) |
 | Analysis: structure, coverage, measures | ![](../screenshots/analysis-structure-teacher.png) ![](../screenshots/analysis-coverage-teacher.png) ![](../screenshots/analysis-metrics-teacher.png) | | |
-| Not shared by the teacher | | ![](../screenshots/analysis-not-shared-owner.png) | |
 | Transcript | ![](../screenshots/transcript-teacher.png) ([portrait](../screenshots/transcript-teacher-portrait.png)) | ![](../screenshots/transcript-owner.png) | ![](../screenshots/transcript-admin.png) |
 | Lecture notes | see below | ![](../screenshots/notes-owner.png) | ![](../screenshots/notes-admin.png) |
 | Measures over time | ![](../screenshots/progress-teacher.png) | ![](../screenshots/progress-owner.png) | ![](../screenshots/progress-admin-empty.png) |
@@ -45,16 +45,15 @@ centre's; the fixture lecture's student names are redacted as `[student]`.
 | Editing, transcript panel open | teacher | ![](../screenshots/notes-teacher-editing.png) |
 | Editing, tablet portrait (panel as a sheet) | teacher | ![](../screenshots/notes-teacher-editing-portrait.png) |
 | Read only | admin | ![](../screenshots/notes-admin.png) |
-| Read only (lecture shared) | owner | ![](../screenshots/notes-owner.png) |
+| Read only | owner | ![](../screenshots/notes-owner.png) |
 | Print | teacher | ![](../screenshots/notes-print.png) |
 
 Decisions made on your behalf:
 - The notes open in a reading view; the teacher presses "Edit notes" to get fields. Saving
   always returns the notes to draft (the API does this) and the editor says so before saving.
-- Problems the API would reject (empty heading or bullet, `[student]`, no cited line, more than
-  6, a line no longer in the transcript) are checked before saving and shown beside the item,
-  in the same place and words as the API's `422` answers. Only the student-name check needs the
-  API; its answer never contains the name, and neither does the screen.
+- Problems the API would reject (empty heading or bullet, no cited line, more than 6, a line
+  no longer in the transcript) are checked before saving and shown beside the item, in the
+  same place and words as the API's `422` answers.
 - Approving is a separate step from saving and says it doesn't send the notes anywhere.
 - Printing gives a handout: the draft label stays on, transcript excerpts and controls go.
 
@@ -120,7 +119,7 @@ Decisions made on your behalf:
   reasons share a note) so the table stays readable; every N/A and low-confidence cell links to
   its note. The low-confidence mark is also written in the cell.
 - Owners and admins pick a teacher (also linked from each teacher in the centre summary). They
-  see the values they can already see in the lecture list, whatever the sharing.
+  see the values they can already see in the lecture list.
 
 ## Upload: participant list and chat log (backend changelog item 2)
 

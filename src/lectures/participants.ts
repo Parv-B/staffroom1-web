@@ -1,6 +1,6 @@
 // The optional participant list and chat log on the new-lecture form. Names are used only to
-// remove students' names from the transcript; they stay in memory on this page (never in
-// browser storage or logs) and the API never returns them.
+// tell the teacher's chat messages from the students'; they stay in memory on this page (never
+// in browser storage or logs) and the API never returns them.
 import { api, unwrap, type Schemas } from "~/api/client";
 import { xhrPut, type PutFn } from "~/upload/transport";
 
@@ -62,8 +62,8 @@ export function listProblem(list: ParticipantList): string | null {
   if (named.length === 0) return null;
   if (named.some((r) => r.name.trim().length > MAX_NAME)) return `A name is longer than ${MAX_NAME.toString()} characters. Shorten it or remove it.`;
   if (named.filter((r) => r.role === "student").length > MAX_STUDENTS) return `The list has more than ${MAX_STUDENTS.toString()} students. Remove the extra rows.`;
-  // Never send a list with the teacher among the students unconfirmed: their own name would
-  // then be removed from the transcript.
+  // Never send a list with the teacher among the students unconfirmed: their own chat messages
+  // would then count as students' answers.
   if (!hasTeacher(list) && !list.teacherAbsentConfirmed) return "Choose the teacher's row in the list, or say the teacher isn't on it.";
   return null;
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "not-shared" | "suggested" | "suggested-tentative" | "new-results";
+export type StatusKind = "low-confidence" | "stale" | "draft" | "approved" | "suggested" | "suggested-tentative" | "new-results";
 
 // Each status has its own hue AND its own shape and word, so none relies on colour alone, and
 // none borrows a severity colour.
@@ -13,7 +13,6 @@ const STYLE: Record<StatusKind, { className: string; icon: ReactNode; label: str
   stale: { className: "text-lagoon bg-lagoon-tint border-l-4 border-lagoon", icon: <Clock />, label: "Out of date" },
   draft: { className: "text-slate border border-dashed border-slate", icon: <Pencil />, label: "Draft, not approved" },
   approved: { className: "text-pen border border-pen", icon: <Check />, label: "Approved" },
-  "not-shared": { className: "text-ink bg-desk", icon: <Lock />, label: "Not shared by the teacher" },
   // AI suggestions are provisional until the teacher keeps or edits them: dashed like a draft;
   // a weak one uses the low-confidence hue.
   suggested: { className: "text-slate border border-dashed border-slate", icon: <Pencil />, label: "Suggested from the recording" },
@@ -75,14 +74,6 @@ function Dot() {
   return (
     <Svg>
       <circle cx="8" cy="8" r="3" fill="currentColor" stroke="none" />
-    </Svg>
-  );
-}
-function Lock() {
-  return (
-    <Svg>
-      <rect x="3.5" y="7" width="9" height="6.5" rx="1" />
-      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
     </Svg>
   );
 }

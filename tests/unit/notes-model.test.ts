@@ -17,7 +17,7 @@ describe("notes editor model", () => {
   it("checks what the API checks, attached to the item", () => {
     const d: Draft = toDraft([
       { heading: "  ", bullets: [] },
-      { heading: "Fine", bullets: [{ text: " \n ", segment_ids: [] }, { text: "Ask [student].", segment_ids: ["s1", "s2", "s3", "s4", "s5", "s6", "s7"] }, { text: "Ok.", segment_ids: ["gone"] }] },
+      { heading: "Fine", bullets: [{ text: " \n ", segment_ids: [] }, { text: "Ask a student.", segment_ids: ["s1", "s2", "s3", "s4", "s5", "s6", "s7"] }, { text: "Ok.", segment_ids: ["gone"] }] },
     ]);
     const p = checkDraft(d, known);
     const [s0, s1] = d as [Draft[number], Draft[number]];
@@ -26,7 +26,7 @@ describe("notes editor model", () => {
     const [b0, b1, b2] = s1.bullets as [Draft[number]["bullets"][number], Draft[number]["bullets"][number], Draft[number]["bullets"][number]];
     expect(problemsAt(p, { kind: "text", section: s1.key, bullet: b0.key }).map((x) => x.type)).toEqual(["empty_text"]);
     expect(problemsAt(p, { kind: "citations", section: s1.key, bullet: b0.key }).map((x) => x.type)).toEqual(["no_evidence"]);
-    expect(problemsAt(p, { kind: "text", section: s1.key, bullet: b1.key }).map((x) => x.type)).toEqual(["student_token"]);
+    expect(problemsAt(p, { kind: "text", section: s1.key, bullet: b1.key })).toEqual([]);
     expect(problemsAt(p, { kind: "citations", section: s1.key, bullet: b1.key }).map((x) => x.type)).toEqual(["too_many_segments"]);
     expect(problemsAt(p, { kind: "citations", section: s1.key, bullet: b2.key }).map((x) => x.type)).toEqual(["unknown_segment"]);
     expect(checkDraft(toDraft(sections), known)).toEqual([]);
@@ -42,8 +42,8 @@ describe("notes editor model", () => {
     const d = toDraft(sections);
     const placed = placeApiProblems(
       [
-        { loc: ["body", "sections", 1, "bullets", 0, "text"], msg: "", type: "name" },
-        { loc: ["body", "sections", 0, "heading"], msg: "", type: "name" },
+        { loc: ["body", "sections", 1, "bullets", 0, "text"], msg: "", type: "empty_text" },
+        { loc: ["body", "sections", 0, "heading"], msg: "", type: "empty_heading" },
         { loc: ["body", "sections", 0, "bullets", 1, "segment_ids"], msg: "", type: "unknown_segment" },
         { loc: ["body", "sections", 0, "bullets"], msg: "", type: "no_bullets" },
         { loc: ["body", "sections", 9, "heading"], msg: "", type: "empty_heading" },
@@ -60,8 +60,8 @@ describe("notes editor model", () => {
       { kind: "notes" },
       { kind: "notes" },
     ]);
-    // The message never repeats the teacher's text or a name.
-    expect(placed[0]?.message).toMatch(/detected as a student's name/);
+    // The message never repeats the teacher's text.
+    expect(placed[0]?.message).toMatch(/Write something for this bullet/);
     expect(placed[0]?.message).not.toContain("C.");
   });
 

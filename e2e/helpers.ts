@@ -27,9 +27,3 @@ export async function apiToken(request: import("@playwright/test").APIRequestCon
   expect(res.ok()).toBe(true);
   return ((await res.json()) as { access_token: string }).access_token;
 }
-
-export async function setShared(request: import("@playwright/test").APIRequestContext, shared: boolean): Promise<void> {
-  const token = await apiToken(request, "teacher");
-  const res = await request.post(`${API_URL}/lectures/${LECTURE_ID}/share`, { headers: { Authorization: `Bearer ${token}` }, data: { shared } });
-  expect(res.ok()).toBe(true);
-}

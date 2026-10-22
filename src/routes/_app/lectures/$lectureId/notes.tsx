@@ -38,7 +38,7 @@ function NotesPage() {
   const { lectureId } = Route.useParams();
   const { me } = Route.useRouteContext();
   return (
-    <AnalysisGate lectureId={lectureId} role={me.role}>
+    <AnalysisGate lectureId={lectureId}>
       <Notes lectureId={lectureId} me={me} />
     </AnalysisGate>
   );
@@ -68,7 +68,7 @@ function Notes({ lectureId, me }: { lectureId: string; me: Me }) {
       setFlash({ kind: "ok", text: "Notes approved." });
     },
     onError: (e: Error) => {
-      if (isApiError(e) && (e.code === "name_in_notes" || e.code === "invalid_notes") && notes.data) {
+      if (isApiError(e) && e.code === "invalid_notes" && notes.data) {
         // Shown on the bullets themselves, in the editor.
         const d = toDraft(notes.data.sections);
         setDraft(d);
@@ -100,7 +100,7 @@ function Notes({ lectureId, me }: { lectureId: string; me: Me }) {
     }
     if (!(canEdit && draft !== null)) {
       return (
-        <div className="measure py-8" role={isApiError(e, "not_shared") || isApiError(e, "notes_unavailable") || isApiError(e, "name_in_notes") ? undefined : "alert"}>
+        <div className="measure py-8" role={isApiError(e, "notes_unavailable") ? undefined : "alert"}>
           <p className="t-reading m-0">{notesError(e)}</p>
         </div>
       );
@@ -203,9 +203,7 @@ function Messages({ flash, downloadError }: { flash: Flash; downloadError: Error
 }
 
 function notesError(e: Error): string {
-  if (isApiError(e, "not_shared")) return "The teacher hasn't shared this lecture, so its notes aren't available to you.";
   if (isApiError(e, "notes_unavailable")) return "There are no notes for this lecture. Staffroom1 didn't write any, and the teacher hasn't written their own.";
-  if (isApiError(e, "name_in_notes")) return "The teacher needs to review these notes after the lecture was processed again, so only they can open them for now.";
   if (isApiError(e, "analysis_not_ready")) return "The notes will be here when the lecture has finished processing.";
   if (isApiError(e) && e.status === 404) return "This lecture doesn't exist, or it isn't one you can see.";
   if (isApiError(e) && e.status === 403) return "Your role can't open these notes.";
@@ -214,15 +212,11 @@ function notesError(e: Error): string {
 
 function approveError(e: Error): string {
   if (isApiError(e, "notes_stale")) return "These notes can't be approved yet: some bullets cite transcript lines that are no longer there. Edit them, choose the lines again and save.";
-  if (isApiError(e, "name_in_notes")) return "These notes can't be approved: some text contains a name detected as a student's name. The places are marked below.";
-  if (isApiError(e, "names_unavailable")) return "The notes can't be checked for students' names right now, so they weren't approved. Try again in a few minutes.";
   return saveError(e);
 }
 
 function saveError(e: Error): string {
   if (isApiError(e, "invalid_notes")) return "The notes weren't saved. The places that need a change are marked below.";
-  if (isApiError(e, "name_in_notes")) return "The notes weren't saved: some text contains a name detected as a student's name in this lecture. The places are marked below.";
-  if (isApiError(e, "names_unavailable")) return "The notes weren't saved, because they can't be checked for students' names right now. Your changes are still here; try again in a few minutes.";
   if (isApiError(e, "validation_error")) return "The notes weren't saved. The places that need a change are marked below.";
   if (isApiError(e, "network_error")) return "The notes weren't saved because the connection dropped. Your changes are still here; save again.";
   if (isApiError(e) && e.status === 403) return "Only the lecture's teacher can change these notes.";

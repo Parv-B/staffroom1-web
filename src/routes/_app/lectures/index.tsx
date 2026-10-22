@@ -101,7 +101,6 @@ function LectureList() {
               <LectureRow
                 key={l.lecture_id}
                 lecture={l}
-                role={me.role}
                 released={l.released_categories ?? null}
                 teacherName={showTeacher ? (teacherNames.get(l.teacher_user_id) ?? "Teacher not listed") : null}
               />
@@ -116,12 +115,10 @@ function LectureList() {
 
 function LectureRow({
   lecture: l,
-  role,
   released,
   teacherName,
 }: {
   lecture: LectureSummary;
-  role: Role;
   released: readonly Category[] | null;
   teacherName: string | null;
 }) {
@@ -141,7 +138,6 @@ function LectureRow({
         </p>
         <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className={`t-small font-semibold ${l.status === "failed" ? "text-ink" : "text-slate"}`}>{STATUS_LABEL[l.status]}</span>
-          <SharingMark shared={l.shared_with_owner} role={role} />
           {l.has_unseen_results ? <NewResults lectureId={l.lecture_id} /> : null}
         </p>
       </div>
@@ -186,13 +182,6 @@ function NewResults({ lectureId }: { lectureId: string }) {
       {seen.isError ? <span className="t-small" role="alert">Not marked. Try again.</span> : null}
     </span>
   );
-}
-
-function SharingMark({ shared, role }: { shared: boolean; role: Role }) {
-  if (role === "teacher") {
-    return <span className="t-small text-slate">{shared ? "Shared with the centre owner" : "Private to you"}</span>;
-  }
-  return shared ? <span className="t-small text-slate">Shared by the teacher</span> : <StatusMark kind="not-shared" />;
 }
 
 function KeyMetrics({ lecture: l }: { lecture: LectureSummary }) {

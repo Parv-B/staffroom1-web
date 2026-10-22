@@ -95,7 +95,6 @@ export const STAGE_WORDS: Readonly<Record<string, string>> = {
   asr: "transcription",
   diarize: "telling speakers apart",
   transcript: "the transcript",
-  redact: "removing names",
   questions: "questions",
   structure: "the lesson's structure",
   coverage: "coverage of objectives",

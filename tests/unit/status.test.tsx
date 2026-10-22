@@ -14,7 +14,6 @@ function detail(over: Partial<LectureDetail>): LectureDetail {
     teacher_user_id: "t",
     status: "running",
     metadata: { chapter: "C" },
-    shared_with_owner: false,
     analysis_available: false,
     total_cost_usd: 0,
     total_seconds: null,
@@ -46,9 +45,9 @@ const estimate = {
 };
 
 describe("processing status", () => {
-  it("lists all 12 stages in order, unreported ones as waiting", () => {
+  it("lists all 11 stages in order, unreported ones as waiting", () => {
     const rows = stageRows(detail({}).stages);
-    expect(rows.map((r) => r.stage)).toEqual(["ingest", "asr", "diarize", "transcript", "redact", "questions", "structure", "coverage", "metrics", "findings", "notes", "report"]);
+    expect(rows.map((r) => r.stage)).toEqual(["ingest", "asr", "diarize", "transcript", "questions", "structure", "coverage", "metrics", "findings", "notes", "report"]);
     expect(rows[2]?.status).toBe("pending");
   });
 

@@ -7,9 +7,8 @@ export const Route = createFileRoute("/_app/lectures/$lectureId/analysis")({
 
 function AnalysisLayout() {
   const { lectureId } = Route.useParams();
-  const { me } = Route.useRouteContext();
   return (
-    <AnalysisGate lectureId={lectureId} role={me.role}>
+    <AnalysisGate lectureId={lectureId}>
       <Outlet />
     </AnalysisGate>
   );

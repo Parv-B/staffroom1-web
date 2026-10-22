@@ -14,7 +14,6 @@ function lecture(id: string, created: string, metrics: LectureSummary["metrics_s
     total_seconds: 0,
     status,
     metadata: { board: "CBSE", grade: "10", subject: "Mathematics", chapter: `Chapter ${id}`, class_type: "online" },
-    shared_with_owner: false,
     findings_summary: {},
     metrics_summary: metrics,
     created_at: created,

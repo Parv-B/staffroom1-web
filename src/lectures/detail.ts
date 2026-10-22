@@ -1,6 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
 import { api, unwrap, type Schemas } from "~/api/client";
-import { parseTranscript, requireValid } from "~/analysis/parse";
 
 export type LectureDetail = Schemas["LectureDetail"];
 export type StageOut = Schemas["StageOut"];
@@ -26,27 +25,11 @@ export const estimateQuery = (durationMs: number) =>
     staleTime: 5 * 60_000,
   });
 
-export const rawTranscriptQuery = (lectureId: string) =>
-  queryOptions({
-    queryKey: ["lecture", lectureId, "transcript", "raw"],
-    queryFn: async () => {
-      const out = await unwrap(api.GET("/lectures/{lecture_id}/transcript", { params: { path: { lecture_id: lectureId }, query: { raw: true } } }));
-      // Same Transcript shape as raw=false (FRONTEND_REQUESTS.md #4, resolved); still validated.
-      return requireValid("transcript", parseTranscript(out.transcript));
-    },
-    staleTime: Infinity,
-    gcTime: 60_000, // don't keep unredacted text around longer than needed
-  });
-
 export const feedbackQuery = (findingId: string) =>
   queryOptions({
     queryKey: ["finding", findingId, "feedback"],
     queryFn: () => unwrap(api.GET("/findings/{finding_id}/feedback", { params: { path: { finding_id: findingId } } })),
   });
-
-export function setShared(lectureId: string, shared: boolean) {
-  return unwrap(api.POST("/lectures/{lecture_id}/share", { params: { path: { lecture_id: lectureId } }, body: { shared } }));
-}
 
 export function rerun(lectureId: string, fromStage: string | null) {
   return unwrap(

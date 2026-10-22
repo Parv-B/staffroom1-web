@@ -6,7 +6,7 @@ import { SectionOrReason } from "~/analysis/sections";
 import type { Category, Finding } from "~/analysis/types.gen";
 import { FindingEntry } from "~/components/FindingEntry";
 import { FindingFeedback, FindingFeedbackReadOnly } from "~/components/FindingFeedback";
-import { CATEGORIES, CATEGORY_ORDER, NOT_YET_REPORTED } from "~/findings/categories";
+import { CATEGORIES, CATEGORY_ORDER, NOT_CHECKED_FOR_LESSON } from "~/findings/categories";
 import { PlayerBar } from "~/media/player";
 
 export const Route = createFileRoute("/_app/lectures/$lectureId/analysis/findings")({
@@ -49,7 +49,7 @@ function Findings() {
         <SectionOrReason a={a} section="findings">
           <p className="t-small measure text-slate">
             Reported in this analysis: {released.map((c) => CATEGORIES[c].label.toLowerCase()).join(", ") || "no categories"}.
-            {unreleased.length > 0 ? ` ${NOT_YET_REPORTED}: ${unreleased.map((c) => CATEGORIES[c].label.toLowerCase()).join(", ")}. Nothing is shown for these, which doesn't mean nothing happened.` : ""}
+            {unreleased.length > 0 ? ` ${NOT_CHECKED_FOR_LESSON}: ${unreleased.map((c) => CATEGORIES[c].label.toLowerCase()).join(", ")}. Nothing is shown for these, which doesn't mean nothing happened.` : ""}
           </p>
 
           {review.length > 0 ? (

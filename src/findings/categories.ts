@@ -32,6 +32,12 @@ export function categoryColours(c: Category): { rule: string; tint: string } {
     : { rule: "var(--ochre)", tint: "var(--ochre-tint)" };
 }
 
+/** Rule 6, per lecture: a category this lecture's report wasn't checked for (it was processed
+ *  before the category was released). Owner's decision (docs/REVIEW.md): never "0", and not
+ *  "still being validated" now that every category is released. */
+export const NOT_CHECKED_FOR_LESSON = "Not checked for this lesson";
+
+/** Rule 6, centre-wide: a category the centre hasn't released at all. */
 export const NOT_YET_REPORTED = "Not yet reported (still being validated)";
 
 export function isReleased(c: Category, released: readonly Category[] | undefined): boolean {

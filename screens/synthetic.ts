@@ -59,3 +59,44 @@ export function syntheticSummary() {
     teachers,
   };
 }
+
+// Synthetic GET /lectures for reviewing the measures-over-time charts with more lectures than the
+// E2E centre has: invented chapters and values, with N/A and low-confidence values on purpose.
+export function syntheticLectures(teacherUserId: string) {
+  const chapters = ["Real Numbers", "Polynomials", "Pair of Linear Equations", "Quadratic Equations", "Arithmetic Progressions", "Triangles", "Coordinate Geometry", "Trigonometry", "Circles"];
+  const items = chapters.map((chapter, i) => {
+    const created = new Date(Date.UTC(2026, 7, 3 + i * 7, 9)).toISOString();
+    const b = (value: number | null, unit: string, low = false, reason: string | null = null) => ({ value, unit, confidence: low ? "low" : "high", reason });
+    const wait = i === 3 ? b(null, "s", false, "The teacher asked no questions that were followed by a pause.") : b([1.2, 1.6, 0.9, 0, 2.1, 1.4, 1.8, 1.1, 2.4][i] ?? 1, "s", i === 5 || i === 6, i === 5 || i === 6 ? "Audio only: a pause can't be told apart from students muted." : null);
+    return {
+      lecture_id: `lec_synthetic${i.toString().padStart(4, "0")}`,
+      org_id: "o",
+      teacher_user_id: teacherUserId,
+      status: "done",
+      metadata: { board: "CBSE", grade: "10", subject: "Mathematics", chapter, class_type: "online" },
+      shared_with_owner: true,
+      analysis_available: true,
+      has_chat: false,
+      has_unseen_results: false,
+      total_cost_usd: 0.8,
+      total_seconds: 300,
+      findings_summary: {},
+      released_categories: ["content_error", "explanation_gap", "conduct", "pedagogy", "strength"],
+      duration_ms: 3_400_000,
+      asr_provider: "assemblyai",
+      created_at: created,
+      updated_at: created,
+      metrics_summary: {
+        student_talk_share: b([0.08, 0.12, 0.1, 0.15, 0.09, 0.18, 0.14, 0.11, 0.16][i] ?? 0.1, "fraction"),
+        teacher_talk_time_s: b([2650, 2480, 2700, 2300, 2590, 2200, 2400, 2550, 2350][i] ?? 2400, "s"),
+        longest_teacher_monologue_s: b([420, 310, 505, 260, 380, 240, 300, 350, 280][i] ?? 300, "s"),
+        teacher_wpm: i === 7 ? b(null, "words/min", false, "Too little teacher speech was transcribed.") : b([150, 142, 155, 139, 148, 136, 141, 0, 144][i] ?? 140, "words/min"),
+        teacher_question_count: b([38, 45, 31, 52, 40, 57, 49, 44, 51][i] ?? 40, "count"),
+        open_question_share: b([0.18, 0.22, 0.12, 0.25, 0.2, 0.3, 0.26, 0.21, 0.28][i] ?? 0.2, "fraction", i === 2, i === 2 ? "Many questions were cut off in the recording." : null),
+        wait_time_median_s: wait,
+        student_turn_count: b([55, 61, 42, 70, 58, 82, 75, 63, 77][i] ?? 60, "count"),
+      },
+    };
+  });
+  return { items, total: items.length, limit: 100, offset: 0 };
+}

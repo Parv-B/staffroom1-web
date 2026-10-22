@@ -257,3 +257,11 @@
     margin: 18mm 16mm;
   }
 }
+
+/* Measures over time: a point's focus ring shows only for keyboard focus. */
+.trend-point .trend-focus {
+  visibility: hidden;
+}
+.trend-point:focus-visible .trend-focus {
+  visibility: visible;
+}

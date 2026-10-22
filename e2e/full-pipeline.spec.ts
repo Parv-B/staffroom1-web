@@ -38,6 +38,7 @@ test("upload with a participant list and chat log, create, and process end to en
     await page.getByRole("button", { name: "Create lecture" }).click();
     await expect(page).toHaveURL(/\/lectures\/lec_[0-9a-f]+(\/status)?$/);
     const lectureId = /lec_[0-9a-f]+/.exec(page.url())?.[0] ?? "";
+    // eslint-disable-next-line no-console -- the run prints which lecture it created
     console.log(`full pipeline: created ${lectureId}`);
 
     const token = await apiToken(request, "teacher");

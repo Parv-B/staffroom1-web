@@ -18,7 +18,7 @@ test("teacher: reads the analysis, jumps to the transcript and plays the evidenc
   await expect(page).toHaveURL(new RegExp(`${lecture}/analysis/overview$`));
   await expect(page.getByRole("heading", { name: "Summary" })).toBeVisible();
   await expect(page.getByRole("switch", { name: "Shared with the centre owner" })).toBeVisible();
-  await expect(page.getByText(/Not yet reported \(still being validated\)/).first()).toBeVisible();
+  await expect(page.getByText(/Not checked for this lesson/).first()).toBeVisible();
 
   await tab(page, "Findings").click();
   const entry = page.locator(`#finding-${STRENGTH}`);

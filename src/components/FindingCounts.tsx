@@ -1,5 +1,5 @@
 import type { Category, Severity } from "~/analysis/types.gen";
-import { CATEGORIES, NOT_YET_REPORTED } from "~/findings/categories";
+import { CATEGORIES, NOT_CHECKED_FOR_LESSON } from "~/findings/categories";
 
 // Teacher-facing order: what worked well first.
 const DISPLAY_ORDER: readonly Category[] = ["strength", "pedagogy", "content_error", "explanation_gap", "conduct"];
@@ -42,7 +42,7 @@ export function FindingCounts({ counts, released }: { counts: Counts; released: 
       </ul>
       {unreleased.length > 0 ? (
         <p className="mt-1 text-slate" data-unreleased>
-          {NOT_YET_REPORTED}: {unreleased.map((c) => CATEGORIES[c].label.toLowerCase()).join(", ")}
+          {NOT_CHECKED_FOR_LESSON}: {unreleased.map((c) => CATEGORIES[c].label.toLowerCase()).join(", ")}
         </p>
       ) : null}
       {released === null ? <p className="mt-1 text-slate">Other categories: open the analysis</p> : null}

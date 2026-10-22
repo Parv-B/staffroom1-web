@@ -8,7 +8,9 @@ import { StatusMark } from "~/components/StatusMark";
 import { lectureTitle } from "~/lectures/vocab";
 import { METRIC_DEFINITIONS } from "~/metrics/definitions.gen";
 import { metricLabel } from "~/metrics/labels";
+import { TrendChart } from "~/progress/TrendChart";
 import { PROGRESS_METRICS, buildProgress, useTeacherLectures, type ProgressCell } from "~/progress/table";
+import { buildTrend } from "~/progress/trend";
 
 export const Route = createFileRoute("/_app/progress")({
   validateSearch: (s: Record<string, unknown>): { teacher?: string } => (typeof s.teacher === "string" && s.teacher ? { teacher: s.teacher } : {}),
@@ -105,6 +107,24 @@ function ProgressTable({ lectures, isTeacher }: { lectures: Parameters<typeof bu
   }
   return (
     <>
+      <section aria-labelledby="charts-h">
+        <h2 id="charts-h" className="t-ui m-0 font-semibold">
+          Each measure, lecture by lecture
+        </h2>
+        <p className="t-small measure mt-1 text-slate">
+          One point per analysed lecture, in upload order. The lines only join lectures next to each other; they don&apos;t predict anything, and there are no
+          targets. Focus or point at a marker for the lecture and its value.
+        </p>
+        <TrendLegend />
+        <div className="mt-4 grid gap-x-10 gap-y-8 lg:grid-cols-2">
+          {PROGRESS_METRICS.map((m) => (
+            <TrendChart key={m} trend={buildTrend(lectures, m)} />
+          ))}
+        </div>
+      </section>
+      <h2 id="table-h" className="t-ui mt-10 mb-2 font-semibold">
+        Exact values
+      </h2>
       <div className="overflow-x-auto" role="region" aria-label="Measures by lecture" tabIndex={0}>
         <table className="t-ui w-full border-collapse">
           <caption className="sr-only">Measures by lecture, oldest first</caption>
@@ -208,5 +228,28 @@ function Cell({ cell }: { cell: ProgressCell }) {
     <span className="nums font-semibold" data-metric-state="value">
       {cell.text}
     </span>
+  );
+}
+
+function TrendLegend() {
+  return (
+    <ul className="t-small mt-3 flex list-none flex-wrap gap-x-6 gap-y-1 p-0 text-slate" aria-label="Chart key">
+      <li className="inline-flex items-center gap-2">
+        <svg width="14" height="14" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" fill="var(--pen)" />
+        </svg>
+        A value
+      </li>
+      <li className="inline-flex items-center gap-2">
+        <svg width="14" height="14" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" fill="var(--sheet)" stroke="var(--heather)" strokeWidth="2" />
+        </svg>
+        Low confidence (hollow)
+      </li>
+      <li className="inline-flex items-center gap-2">
+        <span className="na-box nums">N/A</span>
+        No value: the line breaks here
+      </li>
+    </ul>
   );
 }

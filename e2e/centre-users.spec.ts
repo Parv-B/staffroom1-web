@@ -48,12 +48,18 @@ test.describe("admin: user management", () => {
   const second = `Cd4-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
 
   test.afterAll(async ({ request }) => {
-    // Accounts can't be deleted; leave the test account deactivated.
+    // The test account has no data (no lectures, uploads or feedback), so the API deletes it
+    // outright; if that ever fails, leave it at least deactivated.
     const token = await apiToken(request, "admin");
     const headers = { Authorization: `Bearer ${token}` };
     const users = (await (await request.get(`${API_URL}/users`, { headers })).json()) as { id: string; email: string; active: boolean }[];
     const u = users.find((x) => x.email === email);
-    if (u?.active) await request.patch(`${API_URL}/users/${u.id}`, { headers, data: { active: false } });
+    if (!u) return;
+    const del = await request.delete(`${API_URL}/users/${u.id}`, { headers });
+    if (del.status() !== 204 && u.active) await request.patch(`${API_URL}/users/${u.id}`, { headers, data: { active: false } });
+    expect(del.status()).toBe(204);
+    const after = (await (await request.get(`${API_URL}/users`, { headers })).json()) as { email: string }[];
+    expect(after.some((x) => x.email === email)).toBe(false);
   });
 
   test("creates a user, changes the role, resets the password, deactivates, and sees 409 last_admin", async ({ page, request }) => {

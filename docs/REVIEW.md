@@ -86,22 +86,36 @@ Decisions made on your behalf:
   yourself asks first; `409 last_admin` is explained in the dialog.
 - Admins can't reset their own password from Users (the API would allow it); they use Change
   password, which needs the current one.
-- E2E creates one `e2e-managed-…@staffroom1-e2e.com` user per run and deactivates it after
-  (accounts can't be deleted), so the E2E centre's Deactivated list grows by one per run.
+- E2E creates one `e2e-managed-…@staffroom1-e2e.com` user per run, deactivates it in the test,
+  and deletes it in teardown with `DELETE /users/{id}` (the backend deletes only users with no
+  data). The 9 deactivated leftovers from earlier runs were deleted on 2026-10-22.
 
 ## Measures over time (teacher progress view)
 
 | Screen | Role | Screenshot |
 |---|---|---|
-| Your measures | teacher | ![](../screenshots/progress-teacher.png) |
-| Same, tablet portrait (table scrolls sideways in its own region) | teacher | ![](../screenshots/progress-teacher-portrait.png) |
+| Your measures (charts, then the exact-values table) | teacher | ![](../screenshots/progress-teacher.png) |
+| Same, tablet portrait (charts one per row; table scrolls sideways in its own region) | teacher | ![](../screenshots/progress-teacher-portrait.png) |
+| **Synthetic** 9 lectures with N/A and low-confidence values (mocked `/lectures`, invented chapters) | teacher | ![](../screenshots/progress-teacher-synthetic.png) |
+| Same, keyboard focus on a low-confidence point (reason shown) | teacher | ![](../screenshots/progress-teacher-synthetic-focus.png) |
+| Same, tablet portrait | teacher | ![](../screenshots/progress-teacher-synthetic-portrait.png) |
 | One teacher's measures | owner | ![](../screenshots/progress-owner.png) |
 | No teacher chosen yet | admin | ![](../screenshots/progress-admin-empty.png) |
 
 Decisions made on your behalf:
 - `/progress`: one row per analysed lecture, oldest first, with the same eight measures as the
-  centre summary, each exactly as the lecture's report gave it. No chart, no averages, no
-  arrows or colours for up/down, and copy that says higher or lower isn't better in itself.
+  centre summary, each exactly as the lecture's report gave it. No averages, no arrows or
+  colours for up/down, and copy that says higher or lower isn't better in itself.
+- **Line charts (added on your decision, 2026-10-22):** one small chart per measure above the
+  table, one point per analysed lecture in upload order, evenly spaced (stated under each
+  chart). One colour throughout; no target, reference or fitted line, no forecast, no
+  colleagues. N/A (and "not computed") is a hatched band labelled N/A where the line breaks;
+  the line never joins across it. Low-confidence values are hollow markers (shape, not only
+  colour). The vertical axis always starts at zero and its range is written above the chart
+  ("0 to 100%" for shares, so a small change can't look large; long durations in minutes).
+  Every point and N/A band takes keyboard focus and shows the lecture, date, value and any
+  reason (same on hover); each chart has a one-sentence description, and the table below,
+  now headed "Exact values", stays the place for exact numbers.
 - Reasons for N/A and low-confidence values are numbered notes under the table (identical
   reasons share a note) so the table stays readable; every N/A and low-confidence cell links to
   its note. The low-confidence mark is also written in the cell.
@@ -156,22 +170,18 @@ Decisions made on your behalf:
 - **New results** is a quiet ink mark with a dot (not a colour that reads good or bad), with
   "Mark as seen" beside it. Opening the analysis clears it in the cached list too.
 
-## Needs your decision
-1. **Wording for categories a lecture was never checked for.** Rule 6's phrase "Not yet reported
-   (still being validated)" is used everywhere. For lectures processed before a category was
-   released (the fixture lecture: only teaching practice and strengths), "Not checked for this
-   lesson" would be more exact now that all five are released. Keep the brief's phrase, or
-   switch for those lectures?
-2. **First password required when adding a user.** Chosen because code sign-in is off. When
-   email codes are switched on, it could become optional.
-3. **The participant list isn't kept across a page refresh** (it holds minors' names, so it
-   stays out of browser storage); the teacher pastes it again. Acceptable?
-4. **Measures over time has no chart.** Per-lecture values are a table with numbered notes.
-   A plain dot-per-lecture chart per measure is possible, but it invites reading trends as
-   better or worse; I left it out.
-5. **E2E user accounts accumulate** (one deactivated `e2e-managed-…` user per run), because
-   accounts can't be deleted. A backend delete for test users, or a fixed reusable test user,
-   would avoid it.
-6. **Open backend request #5** (`FRONTEND_REQUESTS.md`): the participant-list parser drops any
-   name containing a digit, including the host's own row. Until it's fixed, teachers can add a
-   dropped name by hand.
+## Owner's decisions (2026-10-22)
+1. **Categories a lecture was never checked for** now read **"Not checked for this lesson"**
+   (lecture list, overview and findings). The centre summary keeps "Not checked in any lecture
+   yet" for a group with no checked lecture; "Not yet reported (still being validated)" is left
+   only for a category the centre hasn't released at all (none today).
+2. **First password stays required** when adding a user while email codes are off. No change now.
+3. **The participant list isn't kept across a refresh.** Accepted as is.
+4. **Measures over time has line charts** per measure (see above).
+5. **E2E test users are deleted after each run** via the new `DELETE /users/{id}` (users with
+   no data only; others must be deactivated). The 9 leftovers were deleted.
+
+## Still open
+- **Backend request #5** (participant parser and names with digits): the backend found it isn't
+  a bug (a host row like "E2E teacher" has no name part); the form lets the teacher pick their
+  row.

@@ -333,6 +333,12 @@
           "title": "Metric Refs",
           "type": "array"
         },
+        "occurrences": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Occurrences",
+          "type": "integer"
+        },
         "quote": {
           "title": "Quote",
           "type": "string"

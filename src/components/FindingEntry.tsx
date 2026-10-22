@@ -58,6 +58,12 @@ export function FindingEntry({
             · {aspectLabel(f.aspect)}
           </span>
         ) : null}
+        {(f.occurrences ?? 1) > 1 ? (
+          <span className="font-normal text-slate">
+            {" "}
+            · seen {(f.occurrences ?? 1).toString()} times in this lesson
+          </span>
+        ) : null}
       </p>
       <H id={`${f.finding_id}-claim`} className="t-subheading mt-1 text-ink">
         {isContentError && f.likely_intent ? (

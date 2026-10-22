@@ -162,6 +162,7 @@ export interface Finding {
   issue: string;
   likely_intent?: string | null;
   metric_refs?: string[];
+  occurrences?: number;
   quote: string;
   segment_ids: string[];
   severity: Severity;

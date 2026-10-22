@@ -5,7 +5,7 @@ import { FindingCounts } from "~/components/FindingCounts";
 describe("rule 6: categories a lecture wasn't checked for are 'not checked for this lesson', never zero", () => {
   it("labels unreleased categories and says 'none' only for released ones", () => {
     const { container } = render(<FindingCounts counts={{ strength: { minor: 4 } }} released={["pedagogy", "strength"]} />);
-    expect(screen.getByText(/Not checked for this lesson/)).toHaveTextContent("content accuracy, explanation gaps, classroom conduct");
+    expect(screen.getByText(/Not checked for this lesson/)).toHaveTextContent("content accuracy, teaching shortcomings, classroom conduct");
     expect(screen.getByText("Teaching practice").parentElement).toHaveTextContent("none");
     expect(container.textContent).not.toMatch(/\b0\b/);
     expect(container.textContent).not.toMatch(/Content accuracy\s*none/i);

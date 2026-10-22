@@ -30,7 +30,7 @@ test("teacher: reads the analysis, jumps to the transcript and plays the evidenc
   await expect(page.getByRole("radio")).toHaveCount(0); // one transcript, no redacted variant
 
   await tab(page, "Processing").click();
-  await expect(page.locator("[data-stage]")).toHaveCount(11);
+  await expect(page.locator("[data-stage]")).toHaveCount(12);
   await expect(page.getByRole("button", { name: "Process again" })).toBeVisible();
 });
 

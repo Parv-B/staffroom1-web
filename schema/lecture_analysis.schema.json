@@ -12,13 +12,119 @@
       "title": "ActivityType",
       "type": "string"
     },
+    "Aspect": {
+      "description": "Aspects of teaching and learning one lesson can show (``knowledge/framework``).",
+      "enum": [
+        "subject_knowledge",
+        "lesson_planning",
+        "questioning_dialogue",
+        "challenge_support",
+        "critical_thinking",
+        "checking_understanding",
+        "student_engagement",
+        "student_interaction",
+        "application_connections",
+        "progress_in_lesson",
+        "relationships_conduct"
+      ],
+      "title": "Aspect",
+      "type": "string"
+    },
+    "AspectJudgement": {
+      "properties": {
+        "aspect": {
+          "$ref": "#/$defs/Aspect"
+        },
+        "done_well": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Done Well"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRun"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Level"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "matched_descriptor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matched Descriptor"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Step"
+        },
+        "reason_if_no_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason If No Level"
+        },
+        "supporting_finding_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Finding Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "aspect",
+        "level"
+      ],
+      "title": "AspectJudgement",
+      "type": "object"
+    },
     "Category": {
       "enum": [
         "content_error",
-        "explanation_gap",
+        "shortcoming",
         "conduct",
-        "pedagogy",
-        "strength"
+        "strength",
+        "explanation_gap",
+        "pedagogy"
       ],
       "title": "Category",
       "type": "string"
@@ -153,6 +259,17 @@
     },
     "Finding": {
       "properties": {
+        "aspect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Aspect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "category": {
           "$ref": "#/$defs/Category"
         },
@@ -436,6 +553,37 @@
       ],
       "title": "LectureNotes",
       "type": "object"
+    },
+    "LessonJudgement": {
+      "description": "One entry per aspect, in ``Aspect`` order. No overall grade: one lesson cannot show\nthe school-level evidence an overall judgement needs.",
+      "properties": {
+        "aspects": {
+          "items": {
+            "$ref": "#/$defs/AspectJudgement"
+          },
+          "minItems": 1,
+          "title": "Aspects",
+          "type": "array"
+        }
+      },
+      "required": [
+        "aspects"
+      ],
+      "title": "LessonJudgement",
+      "type": "object"
+    },
+    "Level": {
+      "description": "Six-level lesson judgement, best first; ``good`` is the expected level.",
+      "enum": [
+        "outstanding",
+        "very_good",
+        "good",
+        "acceptable",
+        "weak",
+        "very_weak"
+      ],
+      "title": "Level",
+      "type": "string"
     },
     "Metadata": {
       "properties": {
@@ -1193,6 +1341,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/LectureNotes"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "lesson_judgement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LessonJudgement"
         },
         {
           "type": "null"

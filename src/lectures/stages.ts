@@ -9,6 +9,7 @@ export const STAGES = [
   ["coverage", "Checking the objectives covered"],
   ["metrics", "Measuring talk, questions and pace"],
   ["findings", "Finding what worked and what to review"],
+  ["lesson_judgement", "Rating each aspect of the lesson"],
   ["notes", "Drafting lecture notes"],
   ["report", "Publishing the analysis"],
 ] as const;

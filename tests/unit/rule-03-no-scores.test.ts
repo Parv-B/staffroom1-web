@@ -4,6 +4,8 @@ import { SRC, renderableText, sourceFiles } from "./source-text";
 
 // Rule 3: no scores, indices, percentiles, grades-as-ratings, rankings or "engagement" anywhere
 // in the UI. This walks every string and JSX text the app can render (comments are ignored).
+// (The lesson profile's six named levels per aspect were approved by the owner on 2026-10-22;
+// they are descriptors, not numbers, and are never combined into an overall rating.)
 const FORBIDDEN = /\b(scores?|scoring|percentiles?|rank(?:s|ed|ing|ings)?|leaderboard|engagement|overall rating|best teacher|worst teacher|top teacher|index score)\b/i;
 
 describe("rule 3: no scores", () => {

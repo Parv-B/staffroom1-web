@@ -1,8 +1,9 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useAnalysis } from "~/analysis/AnalysisGate";
 import { statusLabel } from "~/analysis/CoverageView";
-import { makeFindingLink } from "~/analysis/links";
+import { MomentLink, makeFindingLink } from "~/analysis/links";
 import { QualityWarnings, SectionOrReason } from "~/analysis/sections";
+import { LessonProfile } from "~/analysis/LessonProfile";
 import { TeacherSummary } from "~/analysis/TeacherSummary";
 import type { CoverageStatus } from "~/analysis/types.gen";
 import { FindingCounts } from "~/components/FindingCounts";
@@ -10,11 +11,19 @@ import { MetricValue } from "~/components/MetricValue";
 import { metricLabel } from "~/metrics/labels";
 import { fromResult, isScalar } from "~/metrics/reading";
 
-export const Route = createFileRoute("/_app/lectures/$lectureId/analysis/overview")({
+export const Route = createFileRoute(
+  "/_app/lectures/$lectureId/analysis/overview",
+)({
   component: Overview,
 });
 
-const KEY = ["teacher_talk_time_s", "student_talk_share", "teacher_question_count", "wait_time_median_s", "teacher_wpm"] as const;
+const KEY = [
+  "teacher_talk_time_s",
+  "student_talk_share",
+  "teacher_question_count",
+  "wait_time_median_s",
+  "teacher_wpm",
+] as const;
 
 function Overview() {
   const { lectureId } = Route.useParams();
@@ -34,6 +43,23 @@ function Overview() {
         </div>
       </section>
 
+      <section aria-labelledby="profile-h">
+        <h2 id="profile-h" className="t-heading">
+          Lesson profile
+        </h2>
+        <div className="mt-4">
+          <LessonProfile
+            a={a}
+            FindingLink={FindingLink}
+            MomentLink={({ startMs, children }) => (
+              <MomentLink lectureId={lectureId} startMs={startMs}>
+                {children}
+              </MomentLink>
+            )}
+          />
+        </div>
+      </section>
+
       <div className="grid gap-10 lg:grid-cols-2">
         <section aria-labelledby="findings-h">
           <h2 id="findings-h" className="t-subheading">
@@ -41,9 +67,18 @@ function Overview() {
           </h2>
           <div className="mt-3">
             <SectionOrReason a={a} section="findings">
-              <FindingCounts counts={a.findings_summary?.counts_by_category_and_severity ?? {}} released={a.findings_summary?.released_categories ?? null} />
+              <FindingCounts
+                counts={
+                  a.findings_summary?.counts_by_category_and_severity ?? {}
+                }
+                released={a.findings_summary?.released_categories ?? null}
+              />
               <p className="t-small mt-3">
-                <Link to="/lectures/$lectureId/analysis/findings" params={{ lectureId }} className="action">
+                <Link
+                  to="/lectures/$lectureId/analysis/findings"
+                  params={{ lectureId }}
+                  className="action"
+                >
                   Read the findings with their evidence
                 </Link>
               </p>
@@ -59,14 +94,27 @@ function Overview() {
               {c ? (
                 <>
                   <p className="t-ui nums m-0">
-                    {(["covered", "partial", "not_covered", "deferred"] as const)
+                    {(
+                      ["covered", "partial", "not_covered", "deferred"] as const
+                    )
                       .filter((k) => k in c.summary_counts)
-                      .map((k: CoverageStatus) => `${String(c.summary_counts[k])} ${statusLabel(k, c.not_covered_means).toLowerCase()}`)
+                      .map(
+                        (k: CoverageStatus) =>
+                          `${String(c.summary_counts[k])} ${statusLabel(k, c.not_covered_means).toLowerCase()}`,
+                      )
                       .join(", ")}
                   </p>
-                  {!c.objectives_reviewed ? <p className="t-small mt-1 text-slate">From an objective list no one has reviewed yet.</p> : null}
+                  {!c.objectives_reviewed ? (
+                    <p className="t-small mt-1 text-slate">
+                      From an objective list no one has reviewed yet.
+                    </p>
+                  ) : null}
                   <p className="t-small mt-3">
-                    <Link to="/lectures/$lectureId/analysis/coverage" params={{ lectureId }} className="action">
+                    <Link
+                      to="/lectures/$lectureId/analysis/coverage"
+                      params={{ lectureId }}
+                      className="action"
+                    >
                       See each objective
                     </Link>
                   </p>
@@ -87,13 +135,25 @@ function Overview() {
               {KEY.map((name) => {
                 const m = a.metrics?.[name];
                 return (
-                  <div key={name} className="grid gap-x-6 border-t border-slate/25 py-2.5 sm:grid-cols-[16rem_1fr]">
+                  <div
+                    key={name}
+                    className="grid gap-x-6 border-t border-slate/25 py-2.5 sm:grid-cols-[16rem_1fr]"
+                  >
                     <dt className="t-ui">{metricLabel(name)}</dt>
                     <dd className="m-0">
                       {m && isScalar(m) ? (
                         <MetricValue reading={fromResult(name, m)} />
                       ) : (
-                        <MetricValue reading={{ name, value: null, unit: "", lowConfidence: false, nullReason: "Not in this analysis.", lowConfidenceReason: null }} />
+                        <MetricValue
+                          reading={{
+                            name,
+                            value: null,
+                            unit: "",
+                            lowConfidence: false,
+                            nullReason: "Not in this analysis.",
+                            lowConfidenceReason: null,
+                          }}
+                        />
                       )}
                     </dd>
                   </div>
@@ -101,7 +161,11 @@ function Overview() {
               })}
             </dl>
             <p className="t-small mt-3">
-              <Link to="/lectures/$lectureId/analysis/metrics" params={{ lectureId }} className="action">
+              <Link
+                to="/lectures/$lectureId/analysis/metrics"
+                params={{ lectureId }}
+                className="action"
+              >
                 All measures, with how each is worked out
               </Link>
             </p>
@@ -109,7 +173,10 @@ function Overview() {
         </div>
       </section>
 
-      <QualityWarnings a={a} intro="about the recording and how it was processed. Some affect the numbers above." />
+      <QualityWarnings
+        a={a}
+        intro="about the recording and how it was processed. Some affect the numbers above."
+      />
     </div>
   );
 }

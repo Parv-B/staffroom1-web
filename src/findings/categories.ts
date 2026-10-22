@@ -10,13 +10,39 @@ interface CategoryInfo {
 
 export const CATEGORIES: Readonly<Record<Category, CategoryInfo>> = {
   strength: { label: "What worked well", group: "worked" },
-  pedagogy: { label: "Teaching practice", group: "review" },
   content_error: { label: "Content accuracy", group: "review" },
-  explanation_gap: { label: "Explanation gaps", group: "review" },
+  shortcoming: { label: "Teaching shortcomings", group: "review" },
   conduct: { label: "Classroom conduct", group: "review" },
+  explanation_gap: { label: "Explanation gaps", group: "review" },
+  pedagogy: { label: "Teaching practice", group: "review" },
 };
 
-export const CATEGORY_ORDER: readonly Category[] = ["content_error", "explanation_gap", "conduct", "pedagogy", "strength"];
+/** Categories retired on 2026-10-22: shown only where an older analysis has findings in them,
+ *  never listed as "not checked". */
+export const LEGACY_CATEGORIES: readonly Category[] = [
+  "explanation_gap",
+  "pedagogy",
+];
+
+export function isLegacy(c: Category): boolean {
+  return LEGACY_CATEGORIES.includes(c);
+}
+
+/** Every category in reading order (issues first, strengths last), legacy ones included so
+ *  older analyses still show their findings. */
+export const CATEGORY_ORDER: readonly Category[] = [
+  "content_error",
+  "shortcoming",
+  "conduct",
+  "explanation_gap",
+  "pedagogy",
+  "strength",
+];
+
+/** The categories a new analysis can contain. */
+export const CURRENT_CATEGORIES: readonly Category[] = CATEGORY_ORDER.filter(
+  (c) => !isLegacy(c),
+);
 
 export const SEVERITY_LABEL: Readonly<Record<Severity, string>> = {
   info: "for information",
@@ -40,6 +66,9 @@ export const NOT_CHECKED_FOR_LESSON = "Not checked for this lesson";
 /** Rule 6, centre-wide: a category the centre hasn't released at all. */
 export const NOT_YET_REPORTED = "Not yet reported (still being validated)";
 
-export function isReleased(c: Category, released: readonly Category[] | undefined): boolean {
+export function isReleased(
+  c: Category,
+  released: readonly Category[] | undefined,
+): boolean {
   return (released ?? []).includes(c);
 }

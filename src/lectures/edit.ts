@@ -6,11 +6,21 @@ import type { MetadataDraft } from "~/upload/store";
 import { EMPTY_DRAFT } from "./MetadataForm";
 
 export type MetadataPatch = Schemas["MetadataPatch"];
-export type EditableField = "board" | "grade" | "subject" | "chapter" | "class_type" | "class_composition" | "lesson_plan" | "objectives";
+export type EditableField =
+  | "board"
+  | "grade"
+  | "subject"
+  | "chapter"
+  | "class_type"
+  | "class_composition"
+  | "lesson_plan"
+  | "objectives";
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
-export function draftFromMetadata(m: Readonly<Record<string, unknown>>): MetadataDraft {
+export function draftFromMetadata(
+  m: Readonly<Record<string, unknown>>,
+): MetadataDraft {
   const ct = m.class_type;
   const cc = m.class_composition;
   return {
@@ -20,9 +30,14 @@ export function draftFromMetadata(m: Readonly<Record<string, unknown>>): Metadat
     subject: str(m.subject),
     chapter: str(m.chapter),
     class_type: ct === "online" || ct === "in_person" ? ct : "",
-    class_composition: cc === "co_ed" || cc === "girls" || cc === "boys" ? cc : "unknown",
+    class_composition:
+      cc === "co_ed" || cc === "girls" || cc === "boys" ? cc : "unknown",
     lesson_plan: str(m.lesson_plan),
-    objectives: Array.isArray(m.objectives) ? m.objectives.filter((o): o is string => typeof o === "string").join("\n") : "",
+    objectives: Array.isArray(m.objectives)
+      ? m.objectives
+          .filter((o): o is string => typeof o === "string")
+          .join("\n")
+      : "",
   };
 }
 
@@ -34,7 +49,10 @@ function objectives(text: string): string[] {
 }
 
 /** Only what differs from the stored details (text compared after trimming). */
-export function changes(before: MetadataDraft, after: MetadataDraft): { patch: MetadataPatch; fields: EditableField[] } {
+export function changes(
+  before: MetadataDraft,
+  after: MetadataDraft,
+): { patch: MetadataPatch; fields: EditableField[] } {
   const patch: MetadataPatch = { retranscribe: false };
   const fields: EditableField[] = [];
   for (const k of ["board", "grade", "subject", "chapter"] as const) {
@@ -55,7 +73,10 @@ export function changes(before: MetadataDraft, after: MetadataDraft): { patch: M
     patch.lesson_plan = after.lesson_plan.trim() || null;
     fields.push("lesson_plan");
   }
-  if (JSON.stringify(objectives(after.objectives)) !== JSON.stringify(objectives(before.objectives))) {
+  if (
+    JSON.stringify(objectives(after.objectives)) !==
+    JSON.stringify(objectives(before.objectives))
+  ) {
     patch.objectives = objectives(after.objectives);
     fields.push("objectives");
   }
@@ -64,12 +85,17 @@ export function changes(before: MetadataDraft, after: MetadataDraft): { patch: M
 
 /** docs/api.md, "Editing metadata": which parts of the analysis each field feeds. */
 const EFFECT: Readonly<Record<EditableField, string>> = {
-  board: "the lesson's structure, the coverage of objectives, the findings and the notes",
-  grade: "the lesson's structure, the coverage of objectives, the findings and the notes",
-  subject: "the lesson's structure, the coverage of objectives, the findings and the notes",
-  chapter: "the lesson's structure, the coverage of objectives, the findings and the notes",
-  class_type: "who is identified as the teacher, the measures and the findings (and the transcript's speakers, if they change)",
-  class_composition: "the findings",
+  board:
+    "the lesson's structure, the coverage of objectives, the findings, the lesson profile and the notes",
+  grade:
+    "the lesson's structure, the coverage of objectives, the findings, the lesson profile and the notes",
+  subject:
+    "the lesson's structure, the coverage of objectives, the findings, the lesson profile and the notes",
+  chapter:
+    "the lesson's structure, the coverage of objectives, the findings, the lesson profile and the notes",
+  class_type:
+    "who is identified as the teacher, the measures, the findings and the lesson profile (and the transcript's speakers, if they change)",
+  class_composition: "the findings and the lesson profile",
   lesson_plan: "the coverage of objectives",
   objectives: "the coverage of objectives",
 };
@@ -99,11 +125,17 @@ export const STAGE_WORDS: Readonly<Record<string, string>> = {
   structure: "the lesson's structure",
   coverage: "coverage of objectives",
   metrics: "measures",
+  lesson_judgement: "the lesson profile",
   findings: "findings",
   notes: "lecture notes",
   report: "the report",
 };
 
 export function editMetadata(lectureId: string, patch: MetadataPatch) {
-  return unwrap(api.PATCH("/lectures/{lecture_id}/metadata", { params: { path: { lecture_id: lectureId } }, body: patch }));
+  return unwrap(
+    api.PATCH("/lectures/{lecture_id}/metadata", {
+      params: { path: { lecture_id: lectureId } },
+      body: patch,
+    }),
+  );
 }

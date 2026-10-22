@@ -11,10 +11,28 @@ export type ObjectiveSource = "lesson_plan" | "syllabus" | "teacher_stated" | "m
  */
 export type CoverageStatus = "covered" | "partial" | "not_covered" | "deferred";
 /**
+ * Aspects of teaching and learning one lesson can show (``knowledge/framework``).
+ *
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "Aspect".
+ */
+export type Aspect =
+  | "subject_knowledge"
+  | "lesson_planning"
+  | "questioning_dialogue"
+  | "challenge_support"
+  | "critical_thinking"
+  | "checking_understanding"
+  | "student_engagement"
+  | "student_interaction"
+  | "application_connections"
+  | "progress_in_lesson"
+  | "relationships_conduct";
+/**
  * This interface was referenced by `LectureAnalysis`'s JSON-Schema
  * via the `definition` "Category".
  */
-export type Category = "content_error" | "explanation_gap" | "conduct" | "pedagogy" | "strength";
+export type Category = "content_error" | "shortcoming" | "conduct" | "strength" | "explanation_gap" | "pedagogy";
 /**
  * This interface was referenced by `LectureAnalysis`'s JSON-Schema
  * via the `definition` "Severity".
@@ -35,6 +53,13 @@ export type Verdict = "confirmed" | "downgraded" | "rejected";
  * via the `definition` "NotesStatus".
  */
 export type NotesStatus = "draft_requires_teacher_approval" | "approved";
+/**
+ * Six-level lesson judgement, best first; ``good`` is the expected level.
+ *
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "Level".
+ */
+export type Level = "outstanding" | "very_good" | "good" | "acceptable" | "weak" | "very_weak";
 /**
  * This interface was referenced by `LectureAnalysis`'s JSON-Schema
  * via the `definition` "ClassComposition".
@@ -73,6 +98,7 @@ export interface LectureAnalysis {
   findings_summary?: FindingsSummary | null;
   lecture_id: string;
   lecture_notes?: LectureNotes | null;
+  lesson_judgement?: LessonJudgement | null;
   metadata: Metadata;
   metrics?: {
     [k: string]: MetricResult | SeriesResult | undefined;
@@ -123,6 +149,7 @@ export interface Objective {
  * via the `definition` "Finding".
  */
 export interface Finding {
+  aspect?: Aspect | null;
   category: Category;
   claim_as_spoken?: string | null;
   detector_confidence: number;
@@ -217,6 +244,33 @@ export interface NoteBullet {
    */
   segment_ids: [string, ...string[]];
   text: string;
+}
+/**
+ * One entry per aspect, in ``Aspect`` order. No overall grade: one lesson cannot show
+ * the school-level evidence an overall judgement needs.
+ *
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "LessonJudgement".
+ */
+export interface LessonJudgement {
+  /**
+   * @minItems 1
+   */
+  aspects: [AspectJudgement, ...AspectJudgement[]];
+}
+/**
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "AspectJudgement".
+ */
+export interface AspectJudgement {
+  aspect: Aspect;
+  done_well?: string | null;
+  evidence?: EvidenceRun[];
+  level: Level | null;
+  matched_descriptor?: string | null;
+  next_step?: string | null;
+  reason_if_no_level?: string | null;
+  supporting_finding_ids?: string[];
 }
 /**
  * This interface was referenced by `LectureAnalysis`'s JSON-Schema

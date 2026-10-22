@@ -27,10 +27,11 @@
       "Category": {
         "enum": [
           "content_error",
-          "explanation_gap",
+          "shortcoming",
           "conduct",
-          "pedagogy",
-          "strength"
+          "strength",
+          "explanation_gap",
+          "pedagogy"
         ],
         "title": "Category",
         "type": "string"

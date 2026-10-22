@@ -4,7 +4,7 @@ import { queryOptions } from "@tanstack/react-query";
 import type { Category } from "~/analysis/types.gen";
 import { api, unwrap, type Schemas } from "~/api/client";
 import { can } from "~/auth/roles";
-import { CATEGORIES, SEVERITY_LABEL } from "~/findings/categories";
+import { CATEGORIES, SEVERITY_LABEL, isLegacy } from "~/findings/categories";
 
 export const Route = createFileRoute("/_app/admin/feedback")({
   beforeLoad: ({ context }) => {
@@ -20,7 +20,15 @@ const feedbackSummaryQuery = queryOptions({
   staleTime: 60_000,
 });
 
-const ORDER: readonly Category[] = ["strength", "pedagogy", "content_error", "explanation_gap", "conduct"];
+// Retired categories (explanation_gap, pedagogy) appear only while older findings carry them.
+const ORDER: readonly Category[] = [
+  "strength",
+  "content_error",
+  "shortcoming",
+  "conduct",
+  "explanation_gap",
+  "pedagogy",
+];
 const SEVERITIES = ["important", "moderate", "minor", "info"] as const;
 type Counts = Schemas["VerdictCounts"];
 
@@ -30,15 +38,20 @@ function FeedbackSummary() {
     <main className="pt-6">
       <h1 className="t-heading m-0">Responses to findings</h1>
       <p className="t-reading measure mt-2 text-slate">
-        How teachers responded to the findings in their analyses, counted by category across the centre. Use it to judge whether a category's findings can be
-        trusted. It's about the findings, not the teachers: there are no names, comments or per-lecture rows. With only one or two teachers, the counts are in
-        effect theirs.
+        How teachers responded to the findings in their analyses, counted by
+        category across the centre. Use it to judge whether a category's
+        findings can be trusted. It's about the findings, not the teachers:
+        there are no names, comments or per-lecture rows. With only one or two
+        teachers, the counts are in effect theirs.
       </p>
       <div className="mt-6 bg-sheet px-5 pt-4 pb-10 sm:px-8">
-        {q.isPending ? <p className="t-reading py-4 text-slate">Loading the responses</p> : null}
+        {q.isPending ? (
+          <p className="t-reading py-4 text-slate">Loading the responses</p>
+        ) : null}
         {q.isError ? (
           <p className="t-reading py-4" role="alert">
-            The responses couldn't be loaded. Check your connection, then reload the page.
+            The responses couldn't be loaded. Check your connection, then reload
+            the page.
           </p>
         ) : null}
         {q.data ? <Table s={q.data} /> : null}
@@ -51,33 +64,67 @@ function Table({ s }: { s: Schemas["FeedbackSummaryOut"] }) {
   return (
     <>
       <p className="t-small m-0 text-slate">
-        Across {s.n_lectures.toString()} {s.n_lectures === 1 ? "lecture" : "lectures"}. Each finding counts once per person who responded.
+        Across {s.n_lectures.toString()}{" "}
+        {s.n_lectures === 1 ? "lecture" : "lectures"}. Each finding counts once
+        per person who responded.
       </p>
-      <div className="mt-4 overflow-x-auto" role="region" aria-label="Responses by category" tabIndex={0}>
+      <div
+        className="mt-4 overflow-x-auto"
+        role="region"
+        aria-label="Responses by category"
+        tabIndex={0}
+      >
         <table className="t-ui w-full border-collapse">
-          <caption className="sr-only">Responses to findings by category</caption>
+          <caption className="sr-only">
+            Responses to findings by category
+          </caption>
           <thead>
             <tr className="t-small text-slate">
               <th scope="col" className="pr-6 pb-2 text-left font-semibold">
                 Category
               </th>
-              {["Findings", "Agree", "Disagree", "Needs context", "No response yet"].map((h) => (
-                <th key={h} scope="col" className="pr-6 pb-2 text-right font-semibold">
+              {[
+                "Findings",
+                "Agree",
+                "Disagree",
+                "Needs context",
+                "No response yet",
+              ].map((h) => (
+                <th
+                  key={h}
+                  scope="col"
+                  className="pr-6 pb-2 text-right font-semibold"
+                >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {ORDER.map((c) => {
+            {ORDER.filter(
+              (c) =>
+                !isLegacy(c) || (s.categories[c]?.total.n_findings ?? 0) > 0,
+            ).map((c) => {
               const f = s.categories[c];
               const released = s.released_categories.includes(c);
               return (
-                <tr key={c} className="border-t border-slate/25 align-top" data-feedback-row={c}>
+                <tr
+                  key={c}
+                  className="border-t border-slate/25 align-top"
+                  data-feedback-row={c}
+                >
                   <th scope="row" className="py-2.5 pr-6 text-left font-normal">
                     <span className="font-semibold">{CATEGORIES[c].label}</span>
-                    {!released ? <span className="t-small block text-slate">Not shown to teachers yet</span> : null}
-                    {f && f.total.n_findings > 0 && CATEGORIES[c].group === "review" ? <Severities bySeverity={f.by_severity} /> : null}
+                    {!released ? (
+                      <span className="t-small block text-slate">
+                        Not shown to teachers yet
+                      </span>
+                    ) : null}
+                    {f &&
+                    f.total.n_findings > 0 &&
+                    CATEGORIES[c].group === "review" ? (
+                      <Severities bySeverity={f.by_severity} />
+                    ) : null}
                   </th>
                   <Cells counts={f?.total} />
                 </tr>
@@ -87,7 +134,8 @@ function Table({ s }: { s: Schemas["FeedbackSummaryOut"] }) {
         </table>
       </div>
       <p className="t-small measure mt-4 text-slate">
-        "Needs context" means the teacher thought the finding missed something about the class. A category with few findings says little either way.
+        "Needs context" means the teacher thought the finding missed something
+        about the class. A category with few findings says little either way.
       </p>
     </>
   );
@@ -113,7 +161,11 @@ function Cells({ counts }: { counts: Counts | undefined }) {
   );
 }
 
-function Severities({ bySeverity }: { bySeverity: Readonly<Record<string, Counts | undefined>> }) {
+function Severities({
+  bySeverity,
+}: {
+  bySeverity: Readonly<Record<string, Counts | undefined>>;
+}) {
   const rows = SEVERITIES.filter((sv) => (bySeverity[sv]?.n_findings ?? 0) > 0);
   if (rows.length === 0) return null;
   return (
@@ -125,7 +177,9 @@ function Severities({ bySeverity }: { bySeverity: Readonly<Record<string, Counts
           if (!c) return null;
           return (
             <li key={sv} className="nums">
-              {SEVERITY_LABEL[sv]}: {c.n_findings} {c.n_findings === 1 ? "finding" : "findings"}, {c.agree} agree, {c.disagree} disagree, {c.needs_context} needs context,{" "}
+              {SEVERITY_LABEL[sv]}: {c.n_findings}{" "}
+              {c.n_findings === 1 ? "finding" : "findings"}, {c.agree} agree,{" "}
+              {c.disagree} disagree, {c.needs_context} needs context,{" "}
               {c.no_feedback} no response
             </li>
           );

@@ -590,7 +590,7 @@ export interface components {
          * Category
          * @enum {string}
          */
-        Category: "content_error" | "explanation_gap" | "conduct" | "pedagogy" | "strength";
+        Category: "content_error" | "shortcoming" | "conduct" | "strength" | "explanation_gap" | "pedagogy";
         /** CategoryFeedback */
         CategoryFeedback: {
             /** By Severity */

@@ -15,7 +15,7 @@ describe("editing details", () => {
 
   it("explains what each change reruns, per the API's table", () => {
     expect(effects(["objectives", "lesson_plan"])).toEqual(["the coverage of objectives"]);
-    expect(effects(["class_composition"])).toEqual(["the findings"]);
+    expect(effects(["class_composition"])).toEqual(["the findings and the lesson profile"]);
     expect(effects(["chapter"])[0]).toContain("structure");
   });
 

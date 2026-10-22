@@ -45,9 +45,9 @@ const estimate = {
 };
 
 describe("processing status", () => {
-  it("lists all 11 stages in order, unreported ones as waiting", () => {
+  it("lists all 12 stages in order, unreported ones as waiting", () => {
     const rows = stageRows(detail({}).stages);
-    expect(rows.map((r) => r.stage)).toEqual(["ingest", "asr", "diarize", "transcript", "questions", "structure", "coverage", "metrics", "findings", "notes", "report"]);
+    expect(rows.map((r) => r.stage)).toEqual(["ingest", "asr", "diarize", "transcript", "questions", "structure", "coverage", "metrics", "findings", "lesson_judgement", "notes", "report"]);
     expect(rows[2]?.status).toBe("pending");
   });
 

@@ -14,8 +14,8 @@ test("owner: centre summary lists teachers alphabetically, with N/A, low confide
   const summary = (await (await request.get(`${API_URL}/org/summary`, { headers: { Authorization: `Bearer ${token}` } })).json()) as { org: { findings_n_lectures: Record<string, number> } };
   const findings = page.getByRole("region", { name: "Findings by teacher" });
   const centreRow = findings.getByRole("row").filter({ has: page.getByRole("rowheader", { name: "Whole centre" }) });
-  const labels = ["What worked well", "Teaching practice", "Content accuracy", "Explanation gaps", "Classroom conduct"];
-  const order = ["strength", "pedagogy", "content_error", "explanation_gap", "conduct"];
+  const labels = ["What worked well", "Content accuracy", "Teaching shortcomings", "Classroom conduct"];
+  const order = ["strength", "content_error", "shortcoming", "conduct"];
   for (const [i, c] of order.entries()) {
     const cell = centreRow.getByRole("cell").nth(i);
     const n = summary.org.findings_n_lectures[c] ?? 0;

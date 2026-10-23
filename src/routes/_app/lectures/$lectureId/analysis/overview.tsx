@@ -3,7 +3,10 @@ import { useAnalysis } from "~/analysis/AnalysisGate";
 import { statusLabel } from "~/analysis/CoverageView";
 import { MomentLink, makeFindingLink } from "~/analysis/links";
 import { QualityWarnings, SectionOrReason } from "~/analysis/sections";
+import { FocusLists } from "~/analysis/FocusLists";
 import { LessonProfile } from "~/analysis/LessonProfile";
+import { LessonTimeline } from "~/analysis/LessonTimeline";
+import { ProfileChart } from "~/analysis/ProfileChart";
 import { TeacherSummary } from "~/analysis/TeacherSummary";
 import type { CoverageStatus } from "~/analysis/types.gen";
 import { FindingCounts } from "~/components/FindingCounts";
@@ -32,20 +35,55 @@ function Overview() {
   const c = a.coverage;
   return (
     <div className="space-y-12 pt-6">
-      <section aria-labelledby="summary-h">
-        <h2 id="summary-h" className="t-heading">
-          Summary
+      {a.lesson_judgement ? (
+        <section aria-labelledby="glance-h">
+          <h2 id="glance-h" className="t-heading">
+            Lesson at a glance
+          </h2>
+          <p className="t-small measure m-0 mt-2 text-slate">
+            Each aspect of the lesson on six levels, weakest first.{" "}
+            <span className="font-semibold text-ink">Good</span> is the level
+            expected of every lesson. Select an aspect for what it rests on and
+            a next step.
+          </p>
+          <div className="mt-5">
+            <ProfileChart j={a.lesson_judgement} />
+          </div>
+        </section>
+      ) : null}
+
+      <section aria-labelledby="when-h">
+        <h2 id="when-h" className="t-heading">
+          Where it happened
         </h2>
         <div className="mt-4">
-          <SectionOrReason a={a} section="teacher_summary">
-            <TeacherSummary a={a} FindingLink={FindingLink} />
+          <SectionOrReason a={a} section="findings">
+            <LessonTimeline a={a} lectureId={lectureId} />
           </SectionOrReason>
         </div>
       </section>
 
+      <section aria-labelledby="focus-h">
+        <h2 id="focus-h" className="sr-only">
+          What matters most
+        </h2>
+        <SectionOrReason a={a} section="findings">
+          <FocusLists
+            a={a}
+            lectureId={lectureId}
+            FindingLink={FindingLink}
+            MomentLink={({ startMs, children }) => (
+              <MomentLink lectureId={lectureId} startMs={startMs}>
+                {children}
+              </MomentLink>
+            )}
+          />
+        </SectionOrReason>
+      </section>
+
       <section aria-labelledby="profile-h">
         <h2 id="profile-h" className="t-heading">
-          Lesson profile
+          Each aspect in detail
         </h2>
         <div className="mt-4">
           <LessonProfile
@@ -169,6 +207,24 @@ function Overview() {
                 All measures, with how each is worked out
               </Link>
             </p>
+          </SectionOrReason>
+        </div>
+      </section>
+
+      <section aria-labelledby="summary-h">
+        <h2 id="summary-h" className="t-subheading">
+          Written summary
+        </h2>
+        <div className="mt-3">
+          <SectionOrReason a={a} section="teacher_summary">
+            <details>
+              <summary className="t-small cursor-pointer text-slate">
+                The same points as plain text, for copying into a message
+              </summary>
+              <div className="mt-3">
+                <TeacherSummary a={a} FindingLink={FindingLink} />
+              </div>
+            </details>
           </SectionOrReason>
         </div>
       </section>

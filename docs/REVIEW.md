@@ -217,3 +217,19 @@ Decisions made on your behalf:
 - **Backend request #5** (participant parser and names with digits): the backend found it isn't
   a bug (a host row like "E2E teacher" has no name part); the form lets the teacher pick their
   row.
+
+## Overview redesign (2026-10-23)
+
+The analysis overview now opens with what a teacher needs first, instead of the plain-text
+summary:
+- **Lesson at a glance**: every rated aspect on a six-step track, weakest first, with the
+  expected level (good) shaded. Each label jumps to the aspect's full entry further down.
+- **Where it happened**: the outline's sections along the lesson, with a marker at each moment a
+  finding cites (ochre triangles above for points to review, moss circles below for strengths).
+  Each marker opens its finding. On phones the section names are hidden and only the markers show.
+- **Work on first / What worked well**: the summary's top 3 issues and top 2 strengths, each with
+  its time, aspect, severity, first sentence and the suggestion on request.
+- **Each aspect in detail**: the earlier lesson profile panel.
+- The plain-text summary is kept at the bottom, collapsed, for copying into a message.
+- Transcript line ids in finding and profile prose ("s0277") show as times, including in
+  analyses published before the backend began writing times.

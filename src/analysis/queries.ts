@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { api, unwrap } from "~/api/client";
 import { queryClient } from "~/lib/queryClient";
 import { parseAnalysis, requireValid } from "./parse";
+import { withTimesInProse } from "./prose";
 
 export const analysisQuery = (lectureId: string) =>
   queryOptions({
@@ -10,7 +11,7 @@ export const analysisQuery = (lectureId: string) =>
       const raw = await unwrap(api.GET("/lectures/{lecture_id}/analysis", { params: { path: { lecture_id: lectureId } } }));
       // Opening the analysis marks its results seen on the server; refresh the cached marks.
       afterAnalysisOpened(lectureId);
-      return requireValid("analysis", parseAnalysis(raw));
+      return withTimesInProse(requireValid("analysis", parseAnalysis(raw)));
     },
     staleTime: 60_000,
   });

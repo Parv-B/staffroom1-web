@@ -112,7 +112,8 @@ function AspectRow({
   const tone = levelTone(level);
   return (
     <li
-      className="grid gap-x-6 gap-y-2 border-t border-slate/25 py-5 first:border-t-0 md:grid-cols-[minmax(0,16rem)_1fr]"
+      className="grid scroll-mt-24 gap-x-6 gap-y-2 border-t border-slate/25 py-5 first:border-t-0 target:bg-pen-tint md:grid-cols-[minmax(0,16rem)_1fr]"
+      id={`aspect-${x.aspect}`}
       data-aspect={x.aspect}
       data-level={level}
     >

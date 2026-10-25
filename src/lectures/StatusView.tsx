@@ -15,7 +15,7 @@ export interface StageRow {
   error: string | null;
 }
 
-/** All 12 stages in pipeline order. Stages the API hasn't reported yet are waiting. */
+/** All 13 stages in pipeline order. Stages the API hasn't reported yet are waiting. */
 export function stageRows(stages: readonly StageOut[]): StageRow[] {
   const byName = new Map(stages.map((s) => [s.stage, s]));
   const known: StageRow[] = STAGES.map(([stage, label]) => {

@@ -117,6 +117,92 @@
       "title": "AspectJudgement",
       "type": "object"
     },
+    "BoardFrame": {
+      "description": "One page of the board as it stood at ``time_ms`` (shown from ``start_ms``).",
+      "properties": {
+        "content": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content"
+        },
+        "frame_id": {
+          "pattern": "^b\\d{4}$",
+          "title": "Frame Id",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}\\.jpg$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image"
+        },
+        "kind": {
+          "enum": [
+            "board",
+            "slide",
+            "screen",
+            "camera",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "time_ms": {
+          "minimum": 0,
+          "title": "Time Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame_id",
+        "start_ms",
+        "time_ms",
+        "kind"
+      ],
+      "title": "BoardFrame",
+      "type": "object"
+    },
+    "BoardTrack": {
+      "description": "Published: the frames that show board, slide or screen content, in time order.",
+      "properties": {
+        "frames": {
+          "items": {
+            "$ref": "#/$defs/BoardFrame"
+          },
+          "title": "Frames",
+          "type": "array"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frames",
+        "model"
+      ],
+      "title": "BoardTrack",
+      "type": "object"
+    },
     "Category": {
       "enum": [
         "content_error",
@@ -1297,6 +1383,17 @@
     }
   },
   "properties": {
+    "board": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BoardTrack"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "coverage": {
       "anyOf": [
         {

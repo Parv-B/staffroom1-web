@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import type { Finding, Segment, Speaker } from "~/analysis/types.gen";
+import type { BoardFrame, Finding, Segment, Speaker } from "~/analysis/types.gen";
+import { BoardFrameCard } from "~/components/BoardFrameCard";
 import { CATEGORIES, categoryColours } from "~/findings/categories";
 import { mmss } from "~/lib/format";
 import { usePlayer } from "~/media/player";
@@ -15,11 +16,13 @@ interface Props {
   findings: readonly Finding[];
   /** Renders the margin note's link back to the finding. */
   FindingLink: (p: { findingId: string; children: ReactNode }) => ReactNode;
+  /** Board/screen frames, shown before the first line spoken at or after each frame's time. */
+  board?: { lectureId: string; frames: readonly BoardFrame[] };
 }
 
 /** Rule 12: speaker and time on every line; findings highlighted in place. Text is rendered
  *  exactly as the API gives it. */
-export function TranscriptLines({ segments, findings, FindingLink }: Props) {
+export function TranscriptLines({ segments, findings, FindingLink, board }: Props) {
   const player = usePlayer();
   const bySegment = new Map<string, Finding>();
   // The note hangs beside a passage's first line in the margin (wide screens) and follows its
@@ -35,9 +38,24 @@ export function TranscriptLines({ segments, findings, FindingLink }: Props) {
       });
     }
   }
+  // Each frame goes before the first line that starts at or after the moment it was taken.
+  const framesBefore = new Map<string, BoardFrame[]>();
+  const trailing: BoardFrame[] = [];
+  for (const fr of board?.frames ?? []) {
+    const s = segments.find((x) => x.start_ms >= fr.time_ms);
+    if (!s) trailing.push(fr);
+    else framesBefore.set(s.segment_id, [...(framesBefore.get(s.segment_id) ?? []), fr]);
+  }
+  const card = (fr: BoardFrame) =>
+    board ? (
+      <li key={fr.frame_id} className="grid grid-cols-[3.75rem_1fr] gap-x-4 lg:grid-cols-[3.75rem_minmax(0,var(--measure))_14rem] lg:gap-x-6">
+        <span aria-hidden="true" />
+        <BoardFrameCard lectureId={board.lectureId} frame={fr} />
+      </li>
+    ) : null;
   return (
     <ol className="m-0 list-none p-0">
-      {segments.map((s) => {
+      {segments.flatMap((s) => [...(framesBefore.get(s.segment_id) ?? []).map(card), (() => {
         const f = bySegment.get(s.segment_id);
         const c = f ? categoryColours(f.category) : null;
         const opensFinding = f ? firstSegment.has(`${f.finding_id}:${s.segment_id}`) : false;
@@ -93,7 +111,8 @@ export function TranscriptLines({ segments, findings, FindingLink }: Props) {
             </div>
           </li>
         );
-      })}
+      })()])}
+      {trailing.map(card)}
     </ol>
   );
 }

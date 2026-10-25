@@ -4,6 +4,7 @@ export const STAGES = [
   ["asr", "Transcribing the speech"],
   ["diarize", "Telling speakers apart"],
   ["transcript", "Putting the transcript together"],
+  ["board", "Reading the board and screen"],
   ["questions", "Finding the questions asked"],
   ["structure", "Mapping the lesson's sections and problems"],
   ["coverage", "Checking the objectives covered"],

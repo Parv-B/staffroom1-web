@@ -181,6 +181,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lectures/{lecture_id}/board/{image}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Board Image
+         * @description One frame of the board track, as named in the published analysis (``board.frames[].
+         *     image``). Frames are deleted with the recording under the retention policy.
+         */
+        get: operations["get_board_image_lectures__lecture_id__board__image__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lectures/{lecture_id}/media": {
         parameters: {
             query?: never;
@@ -2051,6 +2072,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_board_image_lectures__lecture_id__board__image__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lecture_id: string;
+                image: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A board frame (JPEG) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
                 };
             };
             /** @description Validation Error */

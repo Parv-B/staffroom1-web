@@ -75,7 +75,12 @@ function Transcript({ lectureId }: { lectureId: string }) {
           passages are the evidence for a finding.
         </p>
       </div>
-      <TranscriptLines segments={segments} findings={a.findings ?? []} FindingLink={FindingLink} />
+      <TranscriptLines
+        segments={segments}
+        findings={a.findings ?? []}
+        FindingLink={FindingLink}
+        board={a.board?.frames.length ? { lectureId, frames: a.board.frames } : undefined}
+      />
     </div>
   );
 }

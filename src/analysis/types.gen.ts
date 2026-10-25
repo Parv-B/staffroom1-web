@@ -92,6 +92,7 @@ export type ActivityType = "explanation" | "worked_example" | "student_practice"
 export type Speaker = "teacher" | "student" | "unknown";
 
 export interface LectureAnalysis {
+  board?: BoardTrack | null;
   coverage?: Coverage | null;
   created_at: string;
   findings?: Finding[] | null;
@@ -118,6 +119,30 @@ export interface LectureAnalysis {
   unavailable?: {
     [k: string]: string | undefined;
   };
+}
+/**
+ * Published: the frames that show board, slide or screen content, in time order.
+ *
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "BoardTrack".
+ */
+export interface BoardTrack {
+  frames: BoardFrame[];
+  model: string;
+}
+/**
+ * One page of the board as it stood at ``time_ms`` (shown from ``start_ms``).
+ *
+ * This interface was referenced by `LectureAnalysis`'s JSON-Schema
+ * via the `definition` "BoardFrame".
+ */
+export interface BoardFrame {
+  content?: string | null;
+  frame_id: string;
+  image?: string | null;
+  kind: "board" | "slide" | "screen" | "camera" | "other";
+  start_ms: number;
+  time_ms: number;
 }
 /**
  * This interface was referenced by `LectureAnalysis`'s JSON-Schema

@@ -124,11 +124,17 @@ function LectureRow({
 }) {
   const title = lectureTitle(l.metadata);
   const done = l.status === "done";
+  // A lecture whose processing stopped has no analysis to show: the row is greyed out and says
+  // so, and the title leads to the status page with the reason and "Process again".
+  const stopped = l.status === "failed";
   return (
-    <li className="grid gap-x-8 gap-y-4 border-b border-slate/25 py-6 last:border-b-0 lg:grid-cols-[minmax(0,1fr)_15rem_22rem]">
+    <li
+      data-stopped={stopped || undefined}
+      className={`grid gap-x-8 gap-y-4 border-b border-slate/25 py-6 last:border-b-0 lg:grid-cols-[minmax(0,1fr)_15rem_22rem] ${stopped ? "bg-desk/60 px-3 text-slate" : ""}`}
+    >
       <div>
         <h2 className="t-subheading m-0">
-          <Link to="/lectures/$lectureId" params={{ lectureId: l.lecture_id }} className="text-ink underline decoration-slate/40 underline-offset-4 hover:decoration-pen">
+          <Link to="/lectures/$lectureId" params={{ lectureId: l.lecture_id }} className={`${stopped ? "text-slate" : "text-ink"} underline decoration-slate/40 underline-offset-4 hover:decoration-pen`}>
             {title}
           </Link>
         </h2>
@@ -137,7 +143,8 @@ function LectureRow({
           {lectureFacts(l.metadata, l.duration_ms)}. Uploaded {longDate(l.created_at)}.
         </p>
         <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className={`t-small font-semibold ${l.status === "failed" ? "text-ink" : "text-slate"}`}>{STATUS_LABEL[l.status]}</span>
+          <span className={`t-small font-semibold ${stopped ? "text-ink" : "text-slate"}`}>{STATUS_LABEL[l.status]}</span>
+          {stopped ? <span className="t-small text-slate">Analysis unavailable.</span> : null}
           {l.has_unseen_results ? <NewResults lectureId={l.lecture_id} /> : null}
         </p>
       </div>
@@ -147,6 +154,8 @@ function LectureRow({
         <div className="mt-1">
           {done ? (
             <FindingCounts counts={l.findings_summary} released={released} />
+          ) : stopped ? (
+            <p className="t-small m-0 text-slate">Not available: processing stopped before the analysis was complete.</p>
           ) : (
             <p className="t-small m-0 text-slate">Findings appear when processing finishes.</p>
           )}
@@ -185,6 +194,7 @@ function NewResults({ lectureId }: { lectureId: string }) {
 }
 
 function KeyMetrics({ lecture: l }: { lecture: LectureSummary }) {
+  if (l.status === "failed") return <p className="t-small mt-1 text-slate">Not available.</p>;
   if (l.status !== "done") return <p className="t-small mt-1 text-slate">Measures appear when processing finishes.</p>;
   const summary = l.metrics_summary;
   if (!summary) return <p className="t-small mt-1 text-slate">No measures were stored for this lecture.</p>;

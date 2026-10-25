@@ -86,7 +86,13 @@ export function StatusView({ detail, role, estimate, now }: Props) {
           </p>
         ) : null}
         {detail.status === "awaiting_upload" ? <p className="t-reading m-0">Waiting for the recording to finish uploading.</p> : null}
-        {detail.status === "queued" ? <p className="t-reading m-0">Queued. Processing starts when the worker is free.</p> : null}
+        {detail.status === "queued" ? (
+          <p className="t-reading m-0">
+            {detail.error
+              ? "The last attempt stopped before the analysis was complete, so nothing was published. It will be tried again automatically."
+              : "Queued. Processing starts when the worker is free."}
+          </p>
+        ) : null}
         {detail.status === "running" ? <p className="t-reading m-0">Processing. This page updates by itself.</p> : null}
         {detail.status === "failed" ? (
           <p className="t-reading m-0">
@@ -99,7 +105,7 @@ export function StatusView({ detail, role, estimate, now }: Props) {
             <span className="font-semibold text-ink">{est.main}</span> {est.detail}
           </p>
         ) : null}
-        {showErrors && detail.status === "failed" && detail.error ? (
+        {showErrors && (detail.status === "failed" || detail.status === "queued") && detail.error ? (
           <p className="t-small mt-2 border-l-[3px] border-ink pl-3">What went wrong: {detail.error}</p>
         ) : null}
       </div>

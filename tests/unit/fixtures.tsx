@@ -38,6 +38,9 @@ const fakePlayer: PlayerApi = {
   },
   toggle: () => undefined,
   seek: () => undefined,
+  isVideo: false,
+  videoShown: false,
+  setVideoShown: () => undefined,
 };
 
 export function WithPlayer({ children }: { children: ReactNode }) {

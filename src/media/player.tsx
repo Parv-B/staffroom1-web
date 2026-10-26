@@ -7,6 +7,7 @@ import { mmss } from "~/lib/format";
 interface MediaUrl {
   url: string;
   expiresAt: number; // epoch ms, with a safety margin
+  isVideo: boolean; // a video recording: shown in the video dock
 }
 
 // Renew a little before the URL actually expires, so a seek never races the deadline.
@@ -18,7 +19,11 @@ function mediaQueryKey(lectureId: string) {
 
 async function fetchMediaUrl(lectureId: string): Promise<MediaUrl> {
   const out = await unwrap(api.GET("/lectures/{lecture_id}/media", { params: { path: { lecture_id: lectureId } } }));
-  return { url: out.url, expiresAt: Date.now() + out.expires_in * 1000 - EXPIRY_MARGIN_MS };
+  return {
+    url: out.url,
+    expiresAt: Date.now() + out.expires_in * 1000 - EXPIRY_MARGIN_MS,
+    isVideo: (out.content_type ?? "").startsWith("video/"),
+  };
 }
 
 type PlayerState =
@@ -36,7 +41,31 @@ export interface PlayerApi {
   playFrom: (ms: number) => void;
   toggle: () => void;
   seek: (ms: number) => void;
+  /** The recording is a video: its picture shows in the video dock (unless hidden). */
+  isVideo: boolean;
+  videoShown: boolean;
+  setVideoShown: (shown: boolean) => void;
 }
+
+// Per-viewer convenience: whether the video dock was hidden last time.
+const HIDE_KEY = "staffroom.videoHidden";
+function readHidden(): boolean {
+  try {
+    return window.localStorage.getItem(HIDE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeHidden(hidden: boolean): void {
+  try {
+    window.localStorage.setItem(HIDE_KEY, hidden ? "1" : "0");
+  } catch {
+    // Storage blocked: the choice lasts for this page only.
+  }
+}
+
+// Pages that show the player bar register here, so the video dock only floats over them.
+const DockContext = createContext<((delta: number) => void) | null>(null);
 
 // Exported for tests, which supply a fake player.
 export const PlayerContext = createContext<PlayerApi | null>(null);
@@ -59,7 +88,7 @@ function unavailableMessage(e: ApiError): string | null {
 }
 
 export function PlayerProvider({ lectureId, durationMs, children }: { lectureId: string; durationMs: number; children: ReactNode }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLMediaElement | null>(null);
   const queryClient = useQueryClient();
   const media = useQuery({
     queryKey: mediaQueryKey(lectureId),
@@ -72,6 +101,17 @@ export function PlayerProvider({ lectureId, durationMs, children }: { lectureId:
   const [currentMs, setCurrentMs] = useState(0);
   const pending = useRef<{ ms: number; play: boolean } | null>(null);
   const refreshedFor = useRef<string | null>(null);
+  const [hidden, setHidden] = useState(readHidden);
+  const [bars, setBars] = useState(0);
+  const isVideo = media.data?.isVideo ?? false;
+  const videoShown = isVideo && !hidden;
+  const setVideoShown = useCallback((shown: boolean) => {
+    setHidden(!shown);
+    writeHidden(!shown);
+  }, []);
+  const registerBar = useCallback((delta: number) => {
+    setBars((n) => n + delta);
+  }, []);
 
   const freshUrl = useCallback(async (): Promise<MediaUrl> => {
     const cached = queryClient.getQueryData<MediaUrl>(mediaQueryKey(lectureId));
@@ -155,14 +195,29 @@ export function PlayerProvider({ lectureId, durationMs, children }: { lectureId:
   }, [seekTo]);
 
   const value = useMemo<PlayerApi>(
-    () => ({ state, playing, currentMs, durationMs, playFrom, toggle, seek }),
-    [state, playing, currentMs, durationMs, playFrom, toggle, seek],
+    () => ({ state, playing, currentMs, durationMs, playFrom, toggle, seek, isVideo, videoShown, setVideoShown }),
+    [state, playing, currentMs, durationMs, playFrom, toggle, seek, isVideo, videoShown, setVideoShown],
   );
 
-  return (
-    <PlayerContext value={value}>
-      <audio
-        ref={audioRef}
+  const docked = videoShown && bars > 0;
+  useEffect(() => {
+    // Phones: the dock covers the bottom of the page, so the page makes room for it.
+    document.documentElement.classList.toggle("video-docked", docked);
+    return () => {
+      document.documentElement.classList.remove("video-docked");
+    };
+  }, [docked]);
+
+  // One media element for the whole lecture, so playback carries on across its pages. A video
+  // recording plays in a <video> that lives in the dock (hidden: the sound keeps playing).
+  const MediaTag = isVideo ? "video" : "audio";
+  const element = (
+    <MediaTag
+        ref={(el: HTMLMediaElement | null) => {
+          audioRef.current = el;
+        }}
+        className={isVideo ? "block aspect-video w-full bg-ink" : undefined}
+        playsInline
         preload="metadata"
         onPlay={() => {
           setPlaying(true);
@@ -180,14 +235,56 @@ export function PlayerProvider({ lectureId, durationMs, children }: { lectureId:
         }}
         onError={onError}
       />
-      {children}
+  );
+
+  return (
+    <PlayerContext value={value}>
+      <DockContext value={registerBar}>
+        {isVideo ? (
+          <VideoDock shown={docked} onHide={() => { setVideoShown(false); }}>
+            {element}
+          </VideoDock>
+        ) : (
+          element
+        )}
+        {children}
+      </DockContext>
     </PlayerContext>
+  );
+}
+
+/** The video picture, pinned to the corner of the page (a strip along the bottom on phones).
+ *  The bar above the page still holds play, seek and time. */
+function VideoDock({ shown, onHide, children }: { shown: boolean; onHide: () => void; children: ReactNode }) {
+  return (
+    <section
+      className="video-dock"
+      aria-label="Video of the recording"
+      hidden={!shown}
+      data-no-print
+    >
+      <div className="flex items-center justify-between gap-2 px-2 py-1">
+        <span className="t-small text-sheet">Recording</span>
+        <Button className="t-small text-sheet underline" onPress={onHide}>
+          Hide video
+        </Button>
+      </div>
+      {children}
+    </section>
   );
 }
 
 /** The docked player bar. Sticky at the top of the reading column, in normal flow. */
 export function PlayerBar() {
   const p = usePlayer();
+  const register = use(DockContext);
+  useEffect(() => {
+    if (!register) return;
+    register(1);
+    return () => {
+      register(-1);
+    };
+  }, [register]);
   if (!p) return null;
   if (p.state.kind === "unavailable" || p.state.kind === "error") {
     return (
@@ -249,6 +346,18 @@ export function PlayerBar() {
       <span className="t-small nums shrink-0 text-slate" aria-hidden="true">
         {mmss(p.currentMs)} / {mmss(p.durationMs)}
       </span>
+      {p.isVideo ? (
+        <Button
+          // Phones: the dock has its own Hide button and the bar has no room, so the bar only
+          // offers to bring a hidden video back.
+          className={`button shrink-0 ${p.videoShown ? "max-sm:hidden" : ""}`}
+          onPress={() => {
+            p.setVideoShown(!p.videoShown);
+          }}
+        >
+          {p.videoShown ? "Hide video" : "Show video"}
+        </Button>
+      ) : null}
     </div>
   );
 }

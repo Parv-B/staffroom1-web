@@ -265,3 +265,47 @@
 .trend-point:focus-visible .trend-focus {
   visibility: visible;
 }
+
+/* The video dock: the recording's picture, pinned bottom-right; a strip along the bottom on
+   phones (the page then leaves room for it). */
+.video-dock {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  width: min(24rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+}
+.video-dock[hidden] {
+  display: none;
+}
+/* Wide screens have room beside the reading column: large enough to read the board. */
+@media (min-width: 64rem) {
+  .video-dock {
+    width: clamp(24rem, 40vw, 44rem);
+  }
+}
+@media (max-width: 40rem) {
+  .video-dock {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 0;
+  }
+  .video-dock video {
+    max-height: 32vh;
+  }
+  html.video-docked body {
+    padding-bottom: calc(32vh + 2.5rem);
+  }
+}
+
+/* The finding whose evidence is playing: a Fountain-pen bar in the margin (with "Now playing"
+   in text, so colour is never the only cue). */
+article[data-now-playing] {
+  box-shadow: -0.75rem 0 0 -0.5rem var(--pen);
+}

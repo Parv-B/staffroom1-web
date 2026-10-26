@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import type { EvidenceRun, Finding } from "~/analysis/types.gen";
 import { aspectLabel } from "~/findings/aspects";
 import {
@@ -37,18 +37,67 @@ export function FindingEntry({
       </p>
     );
   }
+  return <FindingBody finding={f} TranscriptLink={TranscriptLink} headingLevel={headingLevel} />;
+}
+
+// Clicks on these keep their own meaning instead of seeking the recording.
+const INTERACTIVE = "a, button, input, textarea, select, label, summary, [role='button'], [data-no-seek]";
+
+/** The finding's first evidence moment and whether the recording is playing inside any of its
+ *  evidence runs right now. */
+function useSeek(f: Finding) {
+  const player = usePlayer();
+  const playable = player?.state.kind === "ready" || player?.state.kind === "loading";
+  const startMs = f.evidence[0].start_ms; // FindingEntry renders a finding only with evidence
+  const nowPlaying =
+    !!player?.playing &&
+    f.evidence.some((ev) => player.currentMs >= ev.start_ms && player.currentMs <= ev.end_ms + 2000);
+  return { player: playable ? player : null, startMs, nowPlaying };
+}
+
+function FindingBody({ finding: f, TranscriptLink, headingLevel }: Required<Props>) {
+  const { player, startMs, nowPlaying } = useSeek(f);
   const info = CATEGORIES[f.category];
   const { rule } = categoryColours(f.category);
   const H = headingLevel === 2 ? "h2" : headingLevel === 3 ? "h3" : "h4";
   const isContentError = f.category === "content_error";
   const lead = isContentError && f.likely_intent ? f.likely_intent : f.issue;
 
+  // A click anywhere on the finding (outside its links and buttons, and not while selecting
+  // text) plays the recording from its first evidence. Keyboard users have the Watch button.
+  const onClick = (e: MouseEvent<HTMLElement>) => {
+    if (!player) return;
+    if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return;
+    if ((window.getSelection()?.toString() ?? "") !== "") return;
+    player.playFrom(startMs);
+  };
+
   return (
     <article
-      className="measure"
+      className={`measure ${player ? "cursor-pointer" : ""}`}
       aria-labelledby={`${f.finding_id}-claim`}
       data-finding-id={f.finding_id}
+      data-now-playing={nowPlaying || undefined}
+      onClick={onClick}
     >
+      {player ? (
+        <p className="t-small nums float-right ml-4 flex items-baseline gap-3">
+          {nowPlaying ? (
+            <span className="font-semibold text-pen" role="status">
+              Now playing
+            </span>
+          ) : null}
+          <button
+            type="button"
+            className="action"
+            onClick={() => {
+              player.playFrom(startMs);
+            }}
+          >
+            {player.isVideo ? "Watch" : "Listen"} from {mmss(startMs)}
+          </button>
+        </p>
+      ) : null}
       <p className="t-small font-semibold" style={{ color: rule }}>
         {info.label}
         {info.group === "review" ? `, ${SEVERITY_LABEL[f.severity]}` : null}
